@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Participant Details</title>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+<header class="bg-white shadow-md p-5 flex justify-between items-center">
+    <h1 class="text-xl font-bold">Participant Details</h1>
+
+    <a href="/admin/dashboard"
+       class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+       Back to Dashboard
+    </a>
+</header>
+
+<main class="p-8">
+    <form action="{{ url_for('admin.admin_delete_participant', pid=pid) }}" method="POST">
+        <button onclick="return confirm('Are you sure you want to permanently delete this participant and all logs?')"
+                class="mt-6 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded">
+            Delete Participant & Logs
+        </button>
+    </form>
+
+    <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Basic Information</h2>
+
+        <p><strong>ID:</strong> {{ participant[1] }}</p>
+        <p><strong>Name:</strong> {{ participant[2] }}</p>
+        <p><strong>Email:</strong> {{ participant[3] }}</p>
+        <p><strong>Age:</strong> {{ participant[4] }}</p>
+        <p><strong>Mobile:</strong> {{ participant[5] }}</p>
+        <p><b>Institution:</b> {{ participant[6] }}</p>
+        {% if participant[6] == "IIITD" %}
+            <p><b>Batch:</b> {{ participant[7] }}</p>
+            <p><b>Branch:</b> {{ participant[8] }}</p>
+            <p><b>Roll Number:</b> {{ participant[9] }}</p>
+        {% else %}
+            <p><b>Other Institution:</b> {{ participant[10] }}</p>
+        {% endif %}
+
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4">Session Files</h2>
+
+        {% if files %}
+            <ul class="space-y-3">
+                {% for f in files %}
+                <li class="flex justify-between items-center p-3 bg-gray-50 rounded shadow-sm">
+                    <span>{{ f }}</span>
+                    <a href="/admin/download/{{ pid }}/{{ f }}"
+                       class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700">
+                       Download
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-600">No session files found.</p>
+        {% endif %}
+    </div>
+
+</main>
+
+</body>
+</html>

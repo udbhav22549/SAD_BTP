@@ -1,0 +1,17 @@
+[
+  {
+    "question": "A B-Tree of order m stores keys in each internal node. Which of the following statements is always true?",
+    "options": ["All leaves are at the same depth", "Each internal node contains at most m children and at least m children", "Insertion always increases height", "Deletion never decreases height"],
+    "answer": "All leaves are at the same depth"
+  },
+  {
+    "question": "In a directed graph, edges represent dependencies between tasks. You are told the graph contains exactly one cycle. Which of the following is necessarily true?",
+    "options": ["BFS tree will contain the cycle", "All nodes in the cycle have equal indegree", "Removing any node of the cycle makes it acyclic", "Removing any one edge of the cycle makes the graph acyclic"],
+    "answer": "Removing any one edge of the cycle makes the graph acyclic"
+  },
+  {
+    "question": "A dependency graph contains exactly one directed cycle, while all other parts are acyclic. Which statement is necessarily always true?",
+    "options": ["Every node in the cycle has at least two incoming edges", "Removing any single node from the cycle will break all cycles in the graph", "Removing any single edge that is part of the cycle will make the entire graph acyclic", "Performing BFS from any node in the cycle will detect the cycle immediately"],
+    "answer": "Removing any single edge that is part of the cycle will make the entire graph acyclic"
+  }
+]

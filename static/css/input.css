@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+/* tell Tailwind which files contain classes */
+@source "../../templates";
+@source "../../static/js";

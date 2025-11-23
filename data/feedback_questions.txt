@@ -1,0 +1,4 @@
+How clear were the instructions?|Very Clear,Somewhat Clear,Not Clear
+How difficult did you find the experiment?|Easy,Moderate,Difficult
+Was the duration comfortable?|Yes,No
+Any additional comments?|TEXT

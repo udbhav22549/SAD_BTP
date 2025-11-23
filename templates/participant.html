@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Social Anxiety Study</title>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+
+
+    <style>
+        html { scroll-behavior: smooth; }
+
+        /* Fade Up */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .animate-float { animation: float 5s ease-in-out infinite; }
+        .animate-fadeUp { animation: fadeUp 1s ease-out forwards; }
+
+        /* Soft glow */
+        .hover-glow:hover {
+            box-shadow: 0 0 22px rgba(99, 102, 241, 0.45);
+        }
+
+        /* Bouncing scroll cue */
+        @keyframes bounce {
+            0%,100% { transform: translateY(0); }
+            50%     { transform: translateY(8px); }
+        }
+
+        /* ============================
+           ANIMATED BLOB BACKGROUND
+        =============================*/
+        /* Updated Blob CSS */
+        .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px); 
+        opacity: 0.8; 
+        animation: blobMove 14s ease-in-out infinite;
+        z-index: -1;
+        }
+
+        .blob1 {
+        width: 380px;
+        height: 380px;
+        top: 5%;
+        left: 5%;
+        background: rgba(59, 130, 246, 0.8); /* darker blue */
+        }
+
+        .blob2 {
+        width: 420px;
+        height: 420px;
+        bottom: 10%;
+        right: 10%;
+        background: rgba(99, 102, 241, 0.8); /* darker indigo */
+        animation-delay: 3s;
+        }
+
+        .blob3 {
+        width: 320px;
+        height: 320px;
+        top: 45%;
+        left: 55%;
+        background: rgba(168, 85, 247, 0.8); /* darker purple */
+        animation-delay: 6s;
+        }
+
+        @keyframes blobMove {
+            0%   { transform: translate(0, 0) scale(1); }
+            50%  { transform: translate(40px, -30px) scale(1.15); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.07);
+        }
+
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-indigo-100 via-blue-50 to-blue-200 min-h-screen overflow-x-hidden">
+
+<div class="relative z-0"> <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+
+    <section class="min-h-screen flex flex-col justify-center items-center text-center px-6 animate-fadeUp relative overflow-hidden">
+
+        <img src="static/image_0.jpg" 
+             class="absolute top-0 left-0 w-full h-full object-cover opacity-30 pointer-events-none -z-10 mix-blend-multiply" 
+             alt="EEG Study">
+
+        <h1 class="text-5xl font-extrabold text-gray-800 drop-shadow-sm mb-6 z-10 relative">
+            Social Interaction & Anxiety Study
+        </h1>
+
+        <p class="text-gray-700 text-lg leading-relaxed max-w-2xl mb-8 z-10 relative">
+            We appreciate your participation.  
+            This study explores how individuals feel during social situations.
+            Your comfort and anonymity are our top priorities.
+        </p>
+
+        <img src="https://illustrations.popsy.co/blue/people-chatting.svg"
+             class="w-72 mx-auto mb-12 animate-float z-10 relative" alt="">
+
+        <a href="#about-section"
+           class="bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold 
+                  px-10 py-4 rounded-2xl shadow-xl hover:scale-[1.05] 
+                  transition-transform duration-300 hover-glow z-10 relative">
+            Know More About Us ↓
+        </a>
+
+        <div class="mt-12 flex flex-col items-center text-gray-600 z-10 relative">
+            <span class="text-sm mb-1">Scroll</span>
+            <div class="w-6 h-10 border-2 border-gray-600 rounded-full flex justify-center items-start p-1">
+                <div class="w-2 h-2 bg-gray-600 rounded-full animate-[bounce_1.5s_infinite]"></div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <section id="about-section" class="py-24 px-8 bg-white/50 relative rounded-xl overflow-hidden">
+
+         <img src="static/image_1.jpg" 
+             class="absolute top-0 left-0 w-full h-full object-cover opacity-30 pointer-events-none -z-10 mix-blend-multiply" 
+             alt="Social Group">
+
+
+        <img src="https://illustrations.popsy.co/blue/teamwork.svg"
+             class="absolute top-10 right-10 w-48 opacity-30 animate-float" alt="">
+        <img src="https://illustrations.popsy.co/green/discussion.svg"
+             class="absolute bottom-12 left-6 w-40 opacity-30 animate-float" alt="">
+
+        <div class="max-w-5xl mx-auto relative z-10"> <h2 class="text-4xl font-extrabold text-center text-gray-800 mb-4 animate-fadeUp">
+                Know More About Us
+            </h2>
+
+            <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12 animate-fadeUp">
+                We are a research group committed to understanding emotional processing,  
+                social behavior, and early detection of social anxiety.  
+                Your participation helps us design better tools for mental well-being 🌿.
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-10">
+
+                <a href="https://persisst.iiitd.edu.in/" target="_blank"
+                   class="bg-white shadow-xl rounded-2xl p-8 hover:scale-[1.04] transition-all duration-300 hover-glow cursor-pointer block">
+                    
+                    <img src="https://illustrations.popsy.co/blue/research.svg" class="w-24 mx-auto mb-6" alt="">
+                    <h3 class="text-xl font-bold text-center text-gray-800 mb-2">About Us</h3>
+                    <p class="text-gray-600 text-sm text-center">
+                        Learn about our lab, our vision, and our work  
+                        in affective computing & social behavior research.
+                    </p>
+                </a>
+
+                <div class="bg-white shadow-xl rounded-2xl p-8 hover:scale-[1.04] transition-all duration-300 hover-glow cursor-pointer">
+                    <img src="https://illustrations.popsy.co/green/community.svg" class="w-24 mx-auto mb-6" alt="">
+                    <h3 class="text-xl font-bold text-center text-gray-800 mb-2">Our Mission</h3>
+                    <p class="text-gray-600 text-sm text-center">
+                        To identify early signs of social anxiety  
+                        and improve emotional well-being through data-driven research.
+                    </p>
+                </div>
+
+                <div class="bg-white shadow-xl rounded-2xl p-8 hover:scale-[1.04] transition-all duration-300 hover-glow cursor-pointer">
+                    <img src="https://illustrations.popsy.co/purple/mental-health.svg" class="w-24 mx-auto mb-6" alt="">
+                    <h3 class="text-xl font-bold text-center text-gray-800 mb-2">Why This Study?</h3>
+                    <p class="text-gray-600 text-sm text-center">
+                        Your participation helps us build better tools  
+                        for emotional understanding and mental health.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="text-center mt-12">
+                <a href="#form-section"
+                   class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3 rounded-xl 
+                          shadow-md text-lg font-semibold hover:scale-[1.06] transition-all hover-glow">
+                    Proceed to Study →
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+
+
+    <section id="form-section" class="min-h-screen flex justify-center items-center py-24 px-4">
+
+        <div class="glass 
+                    w-full max-w-xl p-10 rounded-2xl shadow-2xl animate-fadeUp">
+
+            <h2 class="text-3xl font-extrabold text-center text-gray-800 mb-2">Participant Details</h2>
+
+            <p class="text-center text-gray-600 mb-8">
+                Please enter your basic information to begin the experiment.
+            </p>
+
+            <form action="/participant" method="POST" class="space-y-6">
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Full Name</label>
+                    <input name="name" required class="w-full border border-gray-300 rounded-xl px-4 py-3 
+                        focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none shadow-inner transition-all"
+                        placeholder="Enter your name">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Email</label>
+                    <input name="email" type="email" required class="w-full border border-gray-300 rounded-xl px-4 py-3 
+                        focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none shadow-inner transition-all"
+                        placeholder="Enter your email">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Age</label>
+                    <input name="age" type="number" required min="14" max="50" class="w-full border border-gray-300 rounded-xl px-4 py-3 
+                        focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none shadow-inner transition-all"
+                        placeholder="Enter your age">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Mobile Number</label>
+                    <input name="mobile" required class="w-full border border-gray-300 rounded-xl px-4 py-3 
+                        focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none shadow-inner transition-all"
+                        placeholder="Enter your mobile number">
+                </div>
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">
+                        Institute / College
+                    </label>
+                    <select id="institutionSelect" name="institution" required
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 
+                        focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none shadow-inner transition-all">
+                        <option value="" disabled selected>Select</option>
+                        <option value="IIITD">IIIT Delhi</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div id="iiitdFields" class="hidden space-y-4 mt-4">
+
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Batch</label>
+                        <input name="batch" class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="e.g., 2022">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Branch</label>
+                        <input name="branch" class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="e.g., CSE / ECE">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Roll Number</label>
+                        <input name="roll_number" class="w-full border border-gray-300 rounded-xl px-4 py-3" placeholder="e.g., MT22045">
+                    </div>
+
+                </div>
+
+                <div id="otherInstitutionField" class="hidden mt-4">
+                    <label class="block font-semibold text-gray-700 mb-1">Institution / College Name</label>
+                    <input name="other_institution" class="w-full border border-gray-300 rounded-xl px-4 py-3"
+                        placeholder="Enter your institution name">
+                </div>
+
+
+                <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl 
+                    font-bold text-lg transition duration-200 shadow-lg hover:scale-[1.03] hover-glow">
+                    Start Study →
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+
+    <footer class="glass border-t mt-24 py-12 px-8">
+
+        <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-10">
+
+            <div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">PerSisST Lab</h3>
+                <p class="text-gray-600 text-sm">
+                    A research group at IIIT Delhi focused on social behavior,  
+                    affective computing, and mental health technology.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Quick Links</h3>
+                <ul class="space-y-2 text-gray-600 text-sm">
+                    <li><a href="https://persisst.iiitd.edu.in/" target="_blank" class="hover:text-indigo-600">About Us</a></li>
+                    <li><a href="#about-section" class="hover:text-indigo-600">Our Mission</a></li>
+                    <li><a href="#form-section" class="hover:text-indigo-600">Participate</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Contact</h3>
+                <ul class="space-y-2 text-gray-600 text-sm">
+                    <li>Email: <a href="mailto:persisstlab@iiitd.ac.in" class="text-indigo-600">persisstlab@iiitd.ac.in</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Privacy & Ethics</h3>
+                <p class="text-gray-600 text-sm">
+                    This study follows strict ethical guidelines.  
+                    All responses are completely anonymous.
+                </p>
+            </div>
+
+        </div>
+
+        <hr class="border-gray-300/50 my-10">
+
+        <p class="text-center text-gray-600 text-sm">
+            © 2025 PERISiST Lab, IIIT Delhi — All Rights Reserved.
+        </p>
+
+    </footer>
+
+</div> </body>
+</html>
+
+
+<script>
+    const instSel = document.getElementById("institutionSelect");
+    const iiitdFields = document.getElementById("iiitdFields");
+    const otherField = document.getElementById("otherInstitutionField");
+
+    instSel.addEventListener("change", () => {
+        if (instSel.value === "IIITD") {
+            iiitdFields.classList.remove("hidden");
+            otherField.classList.add("hidden");
+        } else {
+            iiitdFields.classList.add("hidden");
+            otherField.classList.remove("hidden");
+        }
+    });
+</script>

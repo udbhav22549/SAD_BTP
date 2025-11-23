@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Top Bar -->
+    <header class="bg-white shadow-md p-5 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+        <a href="/admin/logout"
+           class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+           Logout
+        </a>
+    </header>
+
+    <main class="p-8">
+        <h2 class="text-xl font-semibold mb-4">Participants</h2>
+
+        <div class="overflow-x-auto bg-white p-6 rounded-xl shadow-lg">
+            <table class="w-full text-left">
+                <thead class="border-b">
+                <tr class="font-semibold text-gray-700">
+                    <th class="py-2">Participant ID</th>
+                    <th class="py-2">Name</th>
+                    <th class="py-2">Email</th>
+                    <th class="py-2">Age</th>
+                    <th class="py-2">Mobile</th>
+                    <th class="py-2">Institute</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for pid, name, email, age, mobile, institution in participants %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-2">{{ pid }}</td>
+                        <td class="py-2">{{ name }}</td>
+                        <td class="py-2">{{ email }}</td>
+                        <td class="py-2">{{ age }}</td>
+                        <td class="py-2">{{ mobile }}</td>
+                        <td class="py-2">{{ institution }}</td>
+
+                        <td class="py-2">
+                            <a href="/admin/participant/{{ pid }}"
+                               class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700">
+                               Open
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+</body>
+</html>
