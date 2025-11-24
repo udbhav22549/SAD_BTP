@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Social Anxiety Study</title>
+    <title>Manodrishti </title>
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
 
@@ -103,13 +103,11 @@
              alt="EEG Study">
 
         <h1 class="text-5xl font-extrabold text-gray-800 drop-shadow-sm mb-6 z-10 relative">
-            Social Interaction & Anxiety Study
+            Manodrishti 
         </h1>
 
         <p class="text-gray-700 text-lg leading-relaxed max-w-2xl mb-8 z-10 relative">
-            We appreciate your participation.  
-            This study explores how individuals feel during social situations.
-            Your comfort and anonymity are our top priorities.
+            We explore how the mind reacts in real social situations through neural and behavioral cues. Your comfort, anonymity, and well-being remain at the center of our research.
         </p>
 
         <img src="https://illustrations.popsy.co/blue/people-chatting.svg"
@@ -234,12 +232,28 @@
                         placeholder="Enter your age">
                 </div>
 
-                <div>
+                <!-- <div>
                     <label class="block font-semibold text-gray-700 mb-1">Mobile Number</label>
                     <input name="mobile" required class="w-full border border-gray-300 rounded-xl px-4 py-3 
                         focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none shadow-inner transition-all"
                         placeholder="Enter your mobile number">
+                </div> -->
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Mobile Number</label>
+                    <input 
+                        name="mobile" 
+                        required
+                        type="tel"
+                        pattern="[0-9]{10}"
+                        maxlength="10"
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 
+                            focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 
+                            outline-none shadow-inner transition-all"
+                        placeholder="Enter your 10-digit mobile number"
+                        title="Please enter a valid 10-digit mobile number"
+                    >
                 </div>
+                
                 <div>
                     <label class="block font-semibold text-gray-700 mb-1">
                         Institute / College

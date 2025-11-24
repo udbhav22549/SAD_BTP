@@ -35,6 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
         guessType: []
     };
 
+    let imageIndex = 0;
+    let imageDescriptions = [];
+    const imageList = ["/static/stage_5_img_0.jpg", "/static/stage_5_img_1.jpg"];
+
     let cameraModulesLoaded = false;
     let initFaceModel, setupCamera, startCameraRecording, stopCameraRecording;
 
@@ -246,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // When Next is clicked, move to questions
     document.getElementById('nextParagraphBtn').addEventListener('click', () => {
         logEvent('paragraph_finished');
-        alertSound.play();
+        // alertSound.play();
         showQuestion();
     });
     toggleExit(false);
@@ -538,7 +542,6 @@ function renderMcqQuestion() {
         `;
     }
 
-
     function showFeedbackForm() {
         currentScreen = "feedback";
         toggleExit(false);
@@ -654,16 +657,23 @@ function renderMcqQuestion() {
         // Show score AFTER feedback
         showImageDescriptionTask();
     }
+
     function showImageDescriptionTask() {
         currentScreen = "image_description";
         toggleExit(false);
         toggleEndSession(true);
 
+        renderImageDescription();
+    }
+
+    function renderImageDescription() {
+        const imgSrc = imageList[imageIndex];
+
         container.innerHTML = `
-            <h1 class="text-3xl font-bold mb-6">Image Description</h1>
+            <h1 class="text-3xl font-bold mb-6">Image Description (${imageIndex + 1}/2)</h1>
             <p class="text-lg mb-4">Please describe what you see in the image below:</p>
 
-            <img src="/static/stage_5_img.jpg" 
+            <img src="${imgSrc}" 
                 class="w-full max-w-md mx-auto rounded shadow mb-6" />
 
             <textarea id="imageDescInput" 
@@ -671,12 +681,13 @@ function renderMcqQuestion() {
                     rows="5"
                     placeholder="Type your description here..."></textarea>
 
-            <button id="submitImageDesc"
+            <button id="imageNextBtn"
                     class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg text-xl">
-                Submit Description
+                ${imageIndex === imageList.length - 1 ? "Submit" : "Next"}
             </button>
         `;
     }
+
     
     function showCompletionScreen() {
         window.location.href = "/thankyou";
@@ -697,26 +708,44 @@ function renderMcqQuestion() {
             e.preventDefault();
             showFeedbackForm();
         }
-        if (e.target.id === "submitImageDesc") {
+        if (e.target.id === "imageNextBtn") {
             const text = document.getElementById("imageDescInput").value.trim();
 
             if (!text) {
-                alert("Please write your description before submitting.");
+                alert("Please write your description before proceeding.");
                 return;
             }
 
-            logEvent("ImageDescription", { description: text });
+            // Save text in array
+            imageDescriptions.push(text);
 
-            // stopCameraRecording();
+            // Log event for this image
+            logEvent("ImageDescription", {
+                image_number: imageIndex + 1,
+                description: text
+            });
+
+            // If more images remain → go to next image
+            if (imageIndex < imageList.length - 1) {
+                imageIndex++;
+                renderImageDescription();
+                return;
+            }
+
+            // If this was the LAST image:
+            // Stop camera and send camera log
             const cameraData = stopCameraRecording();
+
             fetch("/save_camera_log", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ log: cameraData })
-            });
+            }).catch(err => console.error("Camera log save failed:", err));
 
-            showScoreCard();  // now show score after image task
+            // Show scorecard after final image
+            showScoreCard();
         }
+
     });
 
     container.addEventListener('click', (e) => {

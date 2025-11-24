@@ -48,11 +48,11 @@ def init_db():
     admin_count = c.fetchone()[0]
 
     if admin_count == 0:
-        default_pass_hash = hashlib.sha256("admin123".encode()).hexdigest()
+        default_pass_hash = hashlib.sha256("PersisstLab@413".encode()).hexdigest()
         c.execute("""
             INSERT INTO admins (username, password_hash)
             VALUES (?, ?)
-        """, ("admin", default_pass_hash))
+        """, ("Persisst", default_pass_hash))
         print("Default admin created: username='admin', password='admin123'")
 
     # -----------------------------------------------------

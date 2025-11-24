@@ -1,152 +1,304 @@
 [
   {
     "question": "A B-Tree of order m stores keys in each internal node. Which of the following statements is always true?",
-    "options": ["All leaves are at the same depth", "Each internal node contains at most m children and at least m children", "Insertion always increases height", "Deletion never decreases height"],
+    "options": [
+      "All leaves are at the same depth",
+      "Each internal node contains at most m children and at least m children",
+      "Insertion always increases height",
+      "Deletion never decreases height"
+    ],
     "answer": "All leaves are at the same depth"
   },
   {
-    "question": "In a directed graph, edges represent dependencies between tasks. You are told the graph contains exactly one cycle. Which of the following is necessarily true?",
-    "options": ["BFS tree will contain the cycle", "All nodes in the cycle have equal indegree", "Removing any node of the cycle makes it acyclic", "Removing any one edge of the cycle makes the graph acyclic"],
+    "question": "In a directed graph representing task dependencies, the graph contains exactly one cycle. Which statement is necessarily true?",
+    "options": [
+      "BFS tree will contain the cycle",
+      "All nodes in the cycle have equal indegree",
+      "Removing any node of the cycle makes it acyclic",
+      "Removing any one edge of the cycle makes the graph acyclic"
+    ],
     "answer": "Removing any one edge of the cycle makes the graph acyclic"
   },
   {
-    "question": "A dependency graph contains exactly one directed cycle, while all other parts are acyclic. Which statement is necessarily always true?",
-    "options": ["Every node in the cycle has at least two incoming edges", "Removing any single node from the cycle will break all cycles in the graph", "Removing any single edge that is part of the cycle will make the entire graph acyclic", "Performing BFS from any node in the cycle will detect the cycle immediately"],
-    "answer": "Removing any single edge that is part of the cycle will make the entire graph acyclic"
+    "question": "A workflow graph contains exactly one directed cycle while all other parts are acyclic. Which statement is necessarily always true?",
+    "options": [
+      "Every node in the cycle has at least two incoming edges",
+      "Removing any single node from the cycle will break all cycles",
+      "Removing any single edge in the cycle will make the entire graph acyclic",
+      "BFS from any node in the cycle will detect the cycle immediately"
+    ],
+    "answer": "Removing any single edge in the cycle will make the entire graph acyclic"
   },
   {
-    "question": "In which of the following scenarios is a linked list preferred over an array?",
-    "options": ["Random access is needed", "Memory is unlimited", "Frequent insertion and deletion", "Elements are sorted"],
+    "question": "In which scenario is a linked list preferred over an array?",
+    "options": [
+      "Random access is needed",
+      "Memory is unlimited",
+      "Frequent insertion and deletion",
+      "Elements are sorted"
+    ],
     "answer": "Frequent insertion and deletion"
   },
   {
-    "question": "Consider a BST. Which of the following sequences CANNOT be the postorder traversal of a BST?",
-    "options": ["1, 7, 5, 50, 40, 10", "7, 1, 5, 50, 40, 10", "1, 5, 7, 40, 50, 10", "1, 5, 7, 10, 40, 50"],
+    "question": "Which of the following sequences CANNOT be the postorder traversal of a BST?",
+    "options": [
+      "1, 7, 5, 50, 40, 10",
+      "7, 1, 5, 50, 40, 10",
+      "1, 5, 7, 40, 50, 10",
+      "1, 5, 7, 10, 40, 50"
+    ],
     "answer": "7, 1, 5, 50, 40, 10"
   },
   {
-    "question": "You are given a max-heap and you want to find the k-th largest element. Which approach guarantees the best worst-case complexity?",
-    "options": ["Extract max k times", "Convert heap to array and sort", "Use a min-heap of size k", "Modify the heap into a BST"],
+    "question": "You are given a max-heap and want to find the k-th largest element. Which approach guarantees the best worst-case complexity?",
+    "options": [
+      "Extract max k times",
+      "Convert heap to array and sort",
+      "Use a min-heap of size k",
+      "Modify the heap into a BST"
+    ],
     "answer": "Use a min-heap of size k"
   },
   {
-    "question": "A road network graph contains negative edges but no negative cycles. Which shortest-path algorithm guarantees correctness?",
-    "options": ["Dijkstra’s algorithm, because it efficiently handles weighted graphs", "BFS, because it explores nodes level by level", "Bellman–Ford, because it correctly handles negative weights in graphs without negative cycles", "Floyd–Warshall, because it is optimal for directed acyclic graphs"],
-    "answer": "Bellman–Ford, because it correctly handles negative weights in graphs without negative cycles"
+    "question": "A weighted graph contains negative edges but no negative cycles. Which shortest-path algorithm guarantees correctness?",
+    "options": [
+      "Dijkstra’s algorithm",
+      "BFS",
+      "Bellman–Ford, because it handles negative weights without negative cycles",
+      "Floyd–Warshall, because it is optimal for directed acyclic graphs"
+    ],
+    "answer": "Bellman–Ford, because it handles negative weights without negative cycles"
   },
   {
-    "question": "A search engine must support fast auto-suggestions based on prefixes. Which data structure is MOST appropriate?",
-    "options": ["Hash table, because it stores strings efficiently", "Trie (Prefix Tree), because it supports fast prefix search in O(L) time, where L is length of prefix", "Balanced BST, because it maintains sorted strings", "Heap, because it retrieves highest priority queries first"],
-    "answer": "Trie (Prefix Tree), because it supports fast prefix search in O(L) time, where L is length of prefix"
+    "question": "Which data structure is MOST appropriate for prefix-based searching (auto-suggestions)?",
+    "options": [
+      "Hash table",
+      "Trie (Prefix Tree), because it supports O(L) prefix lookup",
+      "Balanced BST",
+      "Heap"
+    ],
+    "answer": "Trie (Prefix Tree), because it supports O(L) prefix lookup"
   },
   {
-    "question": "A dynamic array doubles its size when full. A student claims insertion at the end is slow due to O(n) resizing. Using amortized analysis, evaluate this claim.",
-    "options": ["The student is correct; insertion always takes O(n)", "The student is incorrect; although resizing is O(n), most inserts are O(1), giving amortized O(1) time per insert", "The student is correct only when array remains full", "Insertion cost is unpredictable and cannot be analyzed"],
-    "answer": "The student is incorrect; although resizing is O(n), most inserts are O(1), giving amortized O(1) time per insert"
+    "question": "A dynamic array doubles its capacity when full. Using amortized analysis, evaluate the insertion cost.",
+    "options": [
+      "Insertion always takes O(n)",
+      "Most inserts are O(1), giving amortized O(1)",
+      "Correct only when array remains full",
+      "Insertion cost is unpredictable"
+    ],
+    "answer": "Most inserts are O(1), giving amortized O(1)"
   },
   {
-    "question": "Which data structure should a compiler use to check well-formed nested parentheses, braces, and brackets?",
-    "options": ["Queue, because it ensures FIFO ordering", "Stack, because it ensures last-in, first-out matching needed for nested structures", "Graph, because it can store multiple types of edges", "Hash table, because it supports constant-time lookup"],
-    "answer": "Stack, because it ensures last-in, first-out matching needed for nested structures"
+    "question": "A compiler checks nested parentheses, braces, and brackets. Which data structure is appropriate and why?",
+    "options": [
+      "Queue",
+      "Stack, because it ensures LIFO matching",
+      "Graph",
+      "Hash table"
+    ],
+    "answer": "Stack, because it ensures LIFO matching"
   },
+
   {
-    "question": "What is the output of the following code? arr = [2, 5, 8, 11, 14, 17]; result = []; for x in arr: if x % 2 == 0: result.append(x*x); print(result)",
-    "options": ["[4, 25, 64, 121, 196, 289]", "[4, 64, 196]", "[2, 8, 14]", "[4, 64, 121]"],
+    "question": "What is the final output of the following code?\n```python\narr = [2, 5, 8, 11, 14, 17]\nresult = []\nfor x in arr:\n    if x % 2 == 0:\n        result.append(x * x)\n    else:\n        continue\nprint(result)\n```",
+    "options": [
+      "[4, 25, 64, 121, 196, 289]",
+      "[4, 64, 196]",
+      "[2, 8, 14]",
+      "[4, 64, 121]"
+    ],
     "answer": "[4, 64, 196]"
   },
   {
-    "question": "What is printed? x = [[1,2],[3,4]]; y = x; y[0][1] = 99; print(x)",
-    "options": ["[[1, 99], [3, 4]]", "[[1, 2], [3, 4]]", "[[99, 2], [3, 4]]", "Error"],
+    "question": "What is printed?\n```python\nx = [[1, 2], [3, 4]]\ny = x\ny[0][1] = 99\nprint(x)\n```",
+    "options": [
+      "[[1, 99], [3, 4]]",
+      "[[1, 2], [3, 4]]",
+      "[[99, 2], [3, 4]]",
+      "Error"
+    ],
     "answer": "[[1, 99], [3, 4]]"
   },
   {
-    "question": "What does the following code print? compute(2,3,10,20,x=1,y=2)",
-    "options": ["6", "9", "11", "13"],
-    "answer": "11"
+    "question": "What does the following code print?\n```python\ndef compute(a, b=4, *args, **kwargs):\n    return a + b + len(args) + len(kwargs)\nprint(compute(2, 3, 10, 20, x=1, y=2))\n```",
+    "options": [
+      "6",
+      "9",
+      "11",
+      "13"
+    ],
+    "answer": "13"
   },
   {
-    "question": "What will this dictionary comprehension print? new = {k: v*2 for k,v in data.items() if v % 2 == 1}",
-    "options": ["{'a': 2, 'c': 6}", "{'b': 4}", "{'a': 1, 'b': 2, 'c': 3}", "{}"],
+    "question": "What does this dictionary comprehension produce?\n```python\ndata = {'a': 1, 'b': 2, 'c': 3}\nnew = {k: v*2 for k, v in data.items() if v % 2 == 1}\nprint(new)\n```",
+    "options": [
+      "{'a': 2, 'c': 6}",
+      "{'b': 4}",
+      "{'a': 1, 'b': 2, 'c': 3}",
+      "{}"
+    ],
     "answer": "{'a': 2, 'c': 6}"
   },
   {
-    "question": "What is printed by this code involving exception handling? try: x = 5/0; except ZeroDivisionError: print('Error occurred'); finally: print('Done')",
-    "options": ["Done", "Error occurred", "Error occurred\nDone", "Runtime Exception"],
+    "question": "What is printed?\n```python\ntry:\n    x = 5 / 0\nexcept ZeroDivisionError:\n    print(\"Error occurred\")\nfinally:\n    print(\"Done\")\n```",
+    "options": [
+      "Done",
+      "Error occurred",
+      "Error occurred\\nDone",
+      "Runtime Exception"
+    ],
     "answer": "Error occurred\nDone"
   },
   {
-    "question": "What is the result of tuple unpacking? a, b, *c = [10,20,30,40,50]",
-    "options": ["10 20 [30, 40, 50]", "10 [20, 30] [40, 50]", "[10, 20] [30, 40, 50]", "Error"],
+    "question": "What is the result of the tuple unpacking?\n```python\na, b, *c = [10, 20, 30, 40, 50]\nprint(a, b, c)\n```",
+    "options": [
+      "10 20 [30, 40, 50]",
+      "10 [20, 30] [40, 50]",
+      "[10, 20] [30, 40, 50]",
+      "Error"
+    ],
     "answer": "10 20 [30, 40, 50]"
   },
   {
-    "question": "What is printed regarding string immutability? s='hello'; t=s; s=s+' world'; print(t)",
-    "options": ["\"hello\"", "\"hello world\"", "\"\"", "Error"],
+    "question": "What is printed?\n```python\ns = \"hello\"\nt = s\ns = s + \" world\"\nprint(t)\n```",
+    "options": [
+      "\"hello\"",
+      "\"hello world\"",
+      "\"\"",
+      "Error"
+    ],
     "answer": "\"hello\""
   },
   {
-    "question": "What is the result of the set comprehension? {x*x for x in nums if x % 2 == 1}",
-    "options": ["{1, 4, 9, 16, 25}", "{1, 9, 25}", "{2, 4}", "{3, 9}"],
+    "question": "What is the output?\n```python\nnums = {1, 2, 3, 4, 5}\nnew = {x*x for x in nums if x % 2 == 1}\nprint(new)\n```",
+    "options": [
+      "{1, 4, 9, 16, 25}",
+      "{1, 9, 25}",
+      "{2, 4}",
+      "{3, 9}"
+    ],
     "answer": "{1, 9, 25}"
   },
   {
-    "question": "Does the following code avoid the mutable default argument bug? def append_item(x, lst=[]): if lst==[]: lst=[]; lst.append(x); return lst",
-    "options": ["The code is correct; each call creates a new list", "The code is still incorrect; the default list persists across calls", "The code throws an error", "This code works only if integers are used"],
+    "question": "Does the following code avoid the mutable default argument bug?\n```python\ndef append_item(x, lst=[]):\n    if lst == []:\n        lst = []\n    lst.append(x)\n    return lst\nprint(append_item(1))\nprint(append_item(2))\n```",
+    "options": [
+      "The code is correct; each call creates a new list",
+      "The code is still incorrect; the default list persists across calls",
+      "The code throws an error",
+      "This code works only if integers are used"
+    ],
     "answer": "The code is still incorrect; the default list persists across calls"
   },
   {
-    "question": "Does this code print 20? x=10; def fun(x): x=x+10; return x; print(fun(x))",
-    "options": ["Correct: It prints 20", "Incorrect: It prints 10", "Incorrect: It prints 0", "Incorrect: It throws an error"],
+    "question": "A student claims the following code prints 20. Is the claim correct?\n```python\nx = 10\ndef fun(x):\n    x = x + 10\n    return x\nprint(fun(x))\n```",
+    "options": [
+      "Correct: It prints 20",
+      "Incorrect: It prints 10",
+      "Incorrect: It prints 0",
+      "Incorrect: It throws an error"
+    ],
     "answer": "Correct: It prints 20"
   },
+
   {
-    "question": "A machine fails today with probability 0.08. If it fails today, it fails tomorrow with probability 0.3; otherwise with 0.08. What is the probability it fails tomorrow?",
-    "options": ["0.08", "0.1024", "0.3", "0.38"],
+    "question": "A machine fails today with probability 0.08. If it fails today, it fails tomorrow with probability 0.3, otherwise with probability 0.08. What is the probability it fails tomorrow?",
+    "options": [
+      "0.08",
+      "0.1024",
+      "0.3",
+      "0.38"
+    ],
     "answer": "0.1024"
   },
   {
-    "question": "A committee of 4 is to be formed from 7 teachers and 5 students. At least 2 teachers must be included. How many committees are possible?",
-    "options": ["350", "525", "450", "700"],
+    "question": "A committee of 4 is formed from 7 teachers and 5 students. At least 2 teachers must be included. How many committees are possible?",
+    "options": [
+      "350",
+      "525",
+      "450",
+      "700"
+    ],
     "answer": "525"
   },
   {
-    "question": "E(t)=t^3−6t^2+9t+4. At what value of t is maximum efficiency reached?",
-    "options": ["0", "1", "2", "3"],
+    "question": "A cooling system has efficiency function $$E(t) = t^3 - 6t^2 + 9t + 4$$. At what value of t is efficiency maximized?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
     "answer": "1"
   },
   {
-    "question": "For what value of k does the system 2x+4y=6k and x+2ky=3k have infinitely many solutions?",
-    "options": ["k=1", "k=2", "k=3", "All non-zero k"],
-    "answer": "k=1"
+    "question": "For what value of k does the system have infinitely many solutions?\n\n$$2x + 4y = 6k$$\n$$x + 2ky = 3k$$",
+    "options": [
+      "k = 1",
+      "k = 2",
+      "k = 3",
+      "All non-zero k"
+    ],
+    "answer": "k = 1"
   },
   {
-    "question": "Determine the nature of solutions of: 3x+6y=12 and x+2y=4.",
-    "options": ["Unique solution", "No solution", "Infinitely many solutions", "Cannot be determined"],
+    "question": "Does this system have a unique, no, or infinitely many solutions?\n\n$$3x + 6y = 12$$\n$$x + 2y = 4$$",
+    "options": [
+      "Unique solution",
+      "No solution",
+      "Infinitely many solutions",
+      "Cannot be determined"
+    ],
     "answer": "Infinitely many solutions"
   },
   {
-    "question": "Solve using elimination: 2x−y=14 and x+y=11",
-    "options": ["(2, -3)", "(1, 5)", "(3, -1)", "(2, 7)"],
+    "question": "Solve the system:\n\n$$2x - y = 14$$\n$$x + y = 11$$",
+    "options": [
+      "(2, -3)",
+      "(1, 5)",
+      "(3, -1)",
+      "(2, 7)"
+    ],
     "answer": "(3, -1)"
   },
   {
-    "question": "Are the vectors u=(2,−1,1), v=(1,2,−2) orthogonal?",
-    "options": ["Yes, dot product = 0", "No, dot product = 2", "No, dot product = -3", "Yes, both are unit vectors"],
+    "question": "Are vectors $$u = (2, -1, 1)$$ and $$v = (1, 2, -2)$$ orthogonal?",
+    "options": [
+      "Yes, dot product = 0",
+      "No, dot product = 2",
+      "No, dot product = -3",
+      "Yes, both are unit vectors"
+    ],
     "answer": "No, dot product = -3"
   },
   {
-    "question": "A drone chooses 1 of 10 routes each day; 3 pass through a turbulence zone. For 7 days, what is the probability it encounters turbulence at least once?",
-    "options": ["0.30", "0.80", "0.65", "0.97"],
+    "question": "A drone chooses 1 route from 10 each day; 3 routes have turbulence. Over 7 days, what is the probability it encounters turbulence at least once?",
+    "options": [
+      "0.30",
+      "0.80",
+      "0.65",
+      "0.97"
+    ],
     "answer": "0.97"
   },
   {
-    "question": "Let A = {f(x)=ax+b | a>0, a,b ∈ Z} and B = {f(x)=mx+n | m is even}. What is A ∩ B?",
-    "options": ["Linear functions with integer coefficients", "All constant functions", "Empty set", "All linear functions with positive, even slope"],
+    "question": "Given sets:\n\nA = {f(x) = ax + b | a, b ∈ Z, a > 0}\n\nB = {f(x) = mx + n | m, n ∈ Z, m even}\n\nWhat is A ∩ B?",
+    "options": [
+      "Linear functions with integer coefficients",
+      "All constant functions",
+      "Empty set",
+      "All linear functions with positive, even slope"
+    ],
     "answer": "All linear functions with positive, even slope"
   },
   {
-    "question": "For which value of k is the matrix [[k,2],[3,6]] singular?",
-    "options": ["k=3", "k=4", "k=6", "k=0"],
-    "answer": "k=3"
+    "question": "For which value(s) of k is the matrix singular?\n\n$$A = \\\\begin{bmatrix} k & 2 \\\\ 3 & 6 \\\\end{bmatrix}$$",
+    "options": [
+      "k = 3",
+      "k = 4",
+      "k = 6",
+      "k = 0"
+    ],
+    "answer": "k = 3"
   }
 ]
