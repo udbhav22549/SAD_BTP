@@ -15,7 +15,7 @@ os.makedirs(USER_DATA_DIR, exist_ok=True)
 # Initialize database
 init_db()
 
-# Register blueprints 
+# Register blueprints   
 app.register_blueprint(admin_bp)  
 app.register_blueprint(auth_bp)
 app.register_blueprint(experiment_bp)

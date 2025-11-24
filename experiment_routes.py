@@ -103,7 +103,8 @@ def instructions_page():
 @experiment_bp.route('/begin', methods=['POST'])
 def begin_experiment():
     name = session.get("participant_name", "Participant")
-    return render_template('index.html', name=name, show_exit=True)
+    participant_id=session.get("participant_id")
+    return render_template('index.html', name=name, participant_id=participant_id,show_exit=True)
 
 # ---------- Text / question config ----------
 

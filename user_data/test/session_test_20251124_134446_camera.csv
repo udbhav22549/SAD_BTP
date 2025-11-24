@@ -1,0 +1,7 @@
+timestamp,emotion,AUs
+2025-11-24T13:44:47.022Z,neutral,"['Looking Down', 'Brow Inner Raiser', 'Brow Outer Raiser', 'Blink', 'Lid Tightener']"
+2025-11-24T13:44:47.118Z,sad,"['Looking Down', 'Brow Inner Raiser', 'Brow Outer Raiser', 'Lid Tightener']"
+2025-11-24T13:44:47.211Z,neutral,"['Looking Down', 'Brow Outer Raiser', 'Blink', 'Lid Tightener']"
+2025-11-24T13:44:47.310Z,neutral,"['Looking Down', 'Brow Inner Raiser', 'Brow Outer Raiser', 'Lip Tightener', 'Lid Tightener']"
+2025-11-24T13:44:47.406Z,neutral,"['Looking Down', 'Brow Inner Raiser', 'Brow Outer Raiser', 'Lip Tightener', 'Lid Tightener']"
+2025-11-24T13:44:47.507Z,neutral,"['Looking Down', 'Brow Inner Raiser', 'Brow Outer Raiser', 'Blink', 'Lid Tightener']"

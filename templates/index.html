@@ -13,6 +13,26 @@
       font-family: ui-sans-serif, system-ui;
     }
   </style>
+
+  <!-- MathJax for equations / matrices -->
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- Marked.js for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <script>
+    // --- Disable escaping so MathJax gets \\ correctly ---
+    const renderer = new marked.Renderer();
+    renderer.escape = (text) => text;   // IMPORTANT!
+
+    marked.setOptions({
+      renderer,
+      mangle: false,
+      headerIds: false,
+      breaks: true
+    });
+  </script>
+
 </head>
 
 <body class="min-h-screen flex flex-col items-center">
@@ -20,7 +40,7 @@
   <!-- Top Navigation -->
   <header class="fixed top-0 left-0 w-full bg-white/90 backdrop-blur shadow-sm px-6 py-3 flex justify-between items-center z-50">
     <h2 class="text-lg font-medium text-gray-700">
-      Welcome, <span class="font-semibold">{{ name }}</span>
+      Welcome, <span class="font-semibold">{{ participant_id }}</span>
     </h2>
 
     <div class="flex space-x-3">

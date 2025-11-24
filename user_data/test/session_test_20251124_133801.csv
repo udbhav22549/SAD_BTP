@@ -1,0 +1,17 @@
+UserID,EventType,TimeElapsed,timestamp,VariableFields
+P59e553cc9d,START,0,2025-11-24T19:08:01+05:30,{}
+P59e553cc9d,session_started,0,2025-11-24 19:08:01 IST,{}
+P59e553cc9d,eyes_closed_finished,30,2025-11-24 19:08:31 IST,{}
+P59e553cc9d,paragraph_finished,32,2025-11-24 19:08:33 IST,{}
+P59e553cc9d,question_1_finished,33,2025-11-24 19:08:34 IST,{}
+P59e553cc9d,question_2_finished,34,2025-11-24 19:08:35 IST,{}
+P59e553cc9d,question_3_finished,35,2025-11-24 19:08:36 IST,{}
+P59e553cc9d,question_4_finished,36,2025-11-24 19:08:38 IST,{}
+P59e553cc9d,question_5_finished,38,2025-11-24 19:08:39 IST,{}
+P59e553cc9d,question_6_finished,39,2025-11-24 19:08:40 IST,{}
+P59e553cc9d,question_7_finished,40,2025-11-24 19:08:41 IST,{}
+P59e553cc9d,question_8_finished,41,2025-11-24 19:08:42 IST,{}
+P59e553cc9d,subjective_section_finished,41,2025-11-24 19:08:43 IST,{}
+P59e553cc9d,Qfirstseen,41,2025-11-24 19:08:43 IST,"{""Qn"": 0, ""FirsttimeSeen"": 41}"
+P59e553cc9d,Qfirstseen,43,2025-11-24 19:08:44 IST,"{""Qn"": 29, ""FirsttimeSeen"": 43}"
+P59e553cc9d,QChange,43,2025-11-24 19:08:44 IST,"{""Qn"": 0, ""Qnto"": 29, ""submitted"": ""No""}"

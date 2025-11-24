@@ -1,0 +1,17 @@
+UserID,EventType,TimeElapsed,timestamp,VariableFields
+P59e553cc9d,START,0,2025-11-24T19:04:32+05:30,{}
+P59e553cc9d,session_started,0,2025-11-24 19:04:32 IST,{}
+P59e553cc9d,eyes_closed_finished,31,2025-11-24 19:05:03 IST,{}
+P59e553cc9d,paragraph_finished,33,2025-11-24 19:05:05 IST,{}
+P59e553cc9d,question_1_finished,34,2025-11-24 19:05:07 IST,{}
+P59e553cc9d,question_2_finished,36,2025-11-24 19:05:08 IST,{}
+P59e553cc9d,question_3_finished,37,2025-11-24 19:05:10 IST,{}
+P59e553cc9d,question_4_finished,38,2025-11-24 19:05:11 IST,{}
+P59e553cc9d,question_5_finished,39,2025-11-24 19:05:12 IST,{}
+P59e553cc9d,question_6_finished,41,2025-11-24 19:05:14 IST,{}
+P59e553cc9d,question_7_finished,42,2025-11-24 19:05:15 IST,{}
+P59e553cc9d,question_8_finished,43,2025-11-24 19:05:16 IST,{}
+P59e553cc9d,subjective_section_finished,44,2025-11-24 19:05:16 IST,{}
+imeSeen"": 44}"
+P59e553cc9d,Qfirstseen,46,2025-11-24 19:05:18 IST,"{""Qn"": 29, ""FirsttimeSeen"": 46}"
+P59e553cc9d,QChange,46,2025-11-24 19:05:18 IST,"{""Qn"": 0, ""Qnto"": 29, ""submitted"": ""No""}"

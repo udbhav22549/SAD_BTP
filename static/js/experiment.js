@@ -370,107 +370,113 @@ function renderMcqNav() {
     });
 }
 
-function renderMcqQuestion() {
-    const q = mcqQuestions[currentMcqIndex];
-    const savedAnswer = mcqAnswers[currentMcqIndex];
-    const mcqContainer = document.getElementById('mcqContainer');
-    if (!mcqContainer || !q) return;
+    function renderMcqQuestion() {
+        const q = mcqQuestions[currentMcqIndex];
+        const savedAnswer = mcqAnswers[currentMcqIndex];
+        const mcqContainer = document.getElementById('mcqContainer');
+        if (!mcqContainer || !q) return;
 
-    // Track first time seen
-    if (!firstSeenTime[currentMcqIndex]) {
-        firstSeenTime[currentMcqIndex] = getElapsedSeconds();
-    }
+        // Track first time seen
+        if (!firstSeenTime[currentMcqIndex]) {
+            firstSeenTime[currentMcqIndex] = getElapsedSeconds();
+        }
 
-    // Log first seen
-    if (!mcqVisited.has(currentMcqIndex)) {
-        mcqVisited.add(currentMcqIndex);
-        logEvent("Qfirstseen", {
-            Qn: currentMcqIndex,
-            FirsttimeSeen: firstSeenTime[currentMcqIndex]
-        });
-    }
-
-    // Log question change (when moving from one to another)
-    if (lastMcqIndex !== null && lastMcqIndex !== currentMcqIndex) {
-        logEvent("QChange", {
-            Qn: lastMcqIndex,
-            Qnto: currentMcqIndex,
-            submitted: mcqAnswers[lastMcqIndex] ? "Yes" : "No"
-        });
-    }
-    lastMcqIndex = currentMcqIndex;
-
-    // Render options
-    const optionsHtml = q.options.map(opt => `
-        <label class="block text-left border rounded-lg p-2 mb-2 cursor-pointer hover:bg-gray-100">
-            <input type="radio" name="mcq" value="${opt}" ${savedAnswer === opt ? 'checked' : ''} class="mr-2">
-            ${opt}
-        </label>
-    `).join('');
-
-    mcqContainer.innerHTML = `
-        <h2 class="text-xl font-semibold mb-4">Q${currentMcqIndex + 1}. ${q.question}</h2>
-        ${optionsHtml}
-        <button id="markBtn" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded">
-            ${mcqMarked[currentMcqIndex] ? "Unmark" : "Mark for Review"}
-        </button>
-    `;
-
-    // Update nav + prev / next / submit buttons
-    renderMcqNav();
-
-    const prevBtn = document.getElementById('prevMcq');
-    if (prevBtn) {
-        prevBtn.style.display = currentMcqIndex > 0 ? 'inline-block' : 'none';
-    }
-
-    const submitBtn = document.getElementById('submitMcqs');
-    const nextBtn = document.getElementById('nextMcq');
-    if (currentMcqIndex === mcqQuestions.length - 1) {
-        if (nextBtn) nextBtn.classList.add('hidden');
-        if (submitBtn) submitBtn.classList.remove('hidden');
-    } else {
-        if (nextBtn) nextBtn.classList.remove('hidden');
-        if (submitBtn) submitBtn.classList.add('hidden');
-    }
-
-    // Handle answer selection
-    document.querySelectorAll('input[name="mcq"]').forEach(input => {
-        input.addEventListener('change', () => {
-            const selected = input.value;
-            const firstSeen = firstSeenTime[currentMcqIndex];
-            const responseTime = getElapsedSeconds() - firstSeen;
-
-            logEvent("QSubmit", {
+        // Log first seen
+        if (!mcqVisited.has(currentMcqIndex)) {
+            mcqVisited.add(currentMcqIndex);
+            logEvent("Qfirstseen", {
                 Qn: currentMcqIndex,
-                Soption: selected,
-                FirsttimeSeen: firstSeen,
-                ResponseTime: responseTime
+                FirsttimeSeen: firstSeenTime[currentMcqIndex]
             });
+        }
 
-            mcqAnswers[currentMcqIndex] = selected;
-            mcqPrevAnswer[currentMcqIndex] = selected;
-
-            renderMcqNav();
-        });
-    });
-
-    // Handle Mark / Unmark
-    const markBtn = document.getElementById("markBtn");
-    if (markBtn) {
-        markBtn.addEventListener("click", () => {
-            mcqMarked[currentMcqIndex] = !mcqMarked[currentMcqIndex];
-
-            logEvent(mcqMarked[currentMcqIndex] ? "QMark" : "QUnmark", {
-                Qn: currentMcqIndex,
-                Marked: mcqMarked[currentMcqIndex]
+        // Log question change (when moving from one to another)
+        if (lastMcqIndex !== null && lastMcqIndex !== currentMcqIndex) {
+            logEvent("QChange", {
+                Qn: lastMcqIndex,
+                Qnto: currentMcqIndex,
+                submitted: mcqAnswers[lastMcqIndex] ? "Yes" : "No"
             });
+        }
+        lastMcqIndex = currentMcqIndex;
 
-            // Re-render to update button text & nav color
-            renderMcqQuestion();
+        // Render options
+        const optionsHtml = q.options.map(opt => `
+            <label class="block text-left border rounded-lg p-2 mb-2 cursor-pointer hover:bg-gray-100">
+                <input type="radio" name="mcq" value="${opt}" ${savedAnswer === opt ? 'checked' : ''} class="mr-2">
+                ${opt}
+            </label>
+        `).join('');
+
+        mcqContainer.innerHTML = `
+            <h2 class="text-xl font-semibold mb-4">Q${currentMcqIndex + 1}.</h2>
+            <div class="text-left mb-4 markdown-content">${marked.parse(q.question)}</div>
+            ${optionsHtml}
+            <button id="markBtn" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded">
+                ${mcqMarked[currentMcqIndex] ? "Unmark" : "Mark for Review"}
+            </button>
+        `;
+
+        // Update nav + prev / next / submit buttons
+        renderMcqNav();
+
+        const prevBtn = document.getElementById('prevMcq');
+        if (prevBtn) {
+            prevBtn.style.display = currentMcqIndex > 0 ? 'inline-block' : 'none';
+        }
+
+        const submitBtn = document.getElementById('submitMcqs');
+        const nextBtn = document.getElementById('nextMcq');
+        if (currentMcqIndex === mcqQuestions.length - 1) {
+            if (nextBtn) nextBtn.classList.add('hidden');
+            if (submitBtn) submitBtn.classList.remove('hidden');
+        } else {
+            if (nextBtn) nextBtn.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.add('hidden');
+        }
+
+        // Handle answer selection
+        document.querySelectorAll('input[name="mcq"]').forEach(input => {
+            input.addEventListener('change', () => {
+                const selected = input.value;
+                const firstSeen = firstSeenTime[currentMcqIndex];
+                const responseTime = getElapsedSeconds() - firstSeen;
+
+                logEvent("QSubmit", {
+                    Qn: currentMcqIndex,
+                    Soption: selected,
+                    FirsttimeSeen: firstSeen,
+                    ResponseTime: responseTime
+                });
+
+                mcqAnswers[currentMcqIndex] = selected;
+                mcqPrevAnswer[currentMcqIndex] = selected;
+
+                renderMcqNav();
+            });
         });
+
+        // Handle Mark / Unmark
+        const markBtn = document.getElementById("markBtn");
+        if (markBtn) {
+            markBtn.addEventListener("click", () => {
+                mcqMarked[currentMcqIndex] = !mcqMarked[currentMcqIndex];
+
+                logEvent(mcqMarked[currentMcqIndex] ? "QMark" : "QUnmark", {
+                    Qn: currentMcqIndex,
+                    Marked: mcqMarked[currentMcqIndex]
+                });
+
+                // Re-render to update button text & nav color
+                renderMcqQuestion();
+            });
+        }
+
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+
     }
-}
 
     container.addEventListener('click', (e) => {
     if (e.target.id === 'nextMcq') {
@@ -577,8 +583,8 @@ function renderMcqQuestion() {
 
             <div class="mb-6">
                 <label class="font-semibold block mb-2">Confidence (1 = low, 3 = neutral, 5 = high)</label>
-                <input id="confidenceSlider" type="range" min="1" max="5" value="3" class="w-full">
-                <p id="confValue" class="mt-1 text-gray-700">3</p>
+                <input id="confidenceSlider" type="range" min="0" max="5" value="0" class="w-full">
+                <p id="confValue" class="mt-1 text-gray-700">0</p>
             </div>
 
             <div class="mb-6">

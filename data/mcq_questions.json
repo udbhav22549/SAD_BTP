@@ -1,17 +1,305 @@
 [
   {
     "question": "A B-Tree of order m stores keys in each internal node. Which of the following statements is always true?",
-    "options": ["All leaves are at the same depth", "Each internal node contains at most m children and at least m children", "Insertion always increases height", "Deletion never decreases height"],
-    "answer": "All leaves are at the same depth"
+    "options": [
+      "A. All leaves are at the same depth",
+      "B. Each internal node contains at most m children and at least m children",
+      "C. Insertion always increases height",
+      "D. Deletion never decreases height"
+    ],
+    "answer": "A. All leaves are at the same depth"
   },
   {
-    "question": "In a directed graph, edges represent dependencies between tasks. You are told the graph contains exactly one cycle. Which of the following is necessarily true?",
-    "options": ["BFS tree will contain the cycle", "All nodes in the cycle have equal indegree", "Removing any node of the cycle makes it acyclic", "Removing any one edge of the cycle makes the graph acyclic"],
-    "answer": "Removing any one edge of the cycle makes the graph acyclic"
+    "question": "In a directed graph representing task dependencies, the graph contains exactly one cycle. Which statement is necessarily true?",
+    "options": [
+      "A. BFS tree will contain the cycle",
+      "B. All nodes in the cycle have equal indegree",
+      "C. Removing any node of the cycle makes it acyclic",
+      "D. Removing any one edge of the cycle makes the graph acyclic"
+    ],
+    "answer": "D. Removing any one edge of the cycle makes the graph acyclic"
   },
   {
-    "question": "A dependency graph contains exactly one directed cycle, while all other parts are acyclic. Which statement is necessarily always true?",
-    "options": ["Every node in the cycle has at least two incoming edges", "Removing any single node from the cycle will break all cycles in the graph", "Removing any single edge that is part of the cycle will make the entire graph acyclic", "Performing BFS from any node in the cycle will detect the cycle immediately"],
-    "answer": "Removing any single edge that is part of the cycle will make the entire graph acyclic"
+    "question": "A workflow graph contains exactly one directed cycle while all other parts are acyclic. Which statement is necessarily always true?",
+    "options": [
+      "A. Every node in the cycle has at least two incoming edges",
+      "B. Removing any single node from the cycle will break all cycles",
+      "C. Removing any single edge in the cycle will make the entire graph acyclic",
+      "D. BFS from any node in the cycle will detect the cycle immediately"
+    ],
+    "answer": "C. Removing any single edge in the cycle will make the entire graph acyclic"
+  },
+  {
+    "question": "In which scenario is a linked list preferred over an array?",
+    "options": [
+      "A. Random access is needed",
+      "B. Memory is unlimited",
+      "C. Frequent insertion and deletion",
+      "D. Elements are sorted"
+    ],
+    "answer": "C. Frequent insertion and deletion"
+  },
+  {
+    "question": "Which of the following sequences CANNOT be the postorder traversal of a BST?",
+    "options": [
+      "A. 1, 7, 5, 50, 40, 10",
+      "B. 7, 1, 5, 50, 40, 10",
+      "C. 1, 5, 7, 40, 50, 10",
+      "D. 1, 5, 7, 10, 40, 50"
+    ],
+    "answer": "B. 7, 1, 5, 50, 40, 10"
+  },
+  {
+    "question": "You are given a max-heap and want to find the k-th largest element. Which approach guarantees the best worst-case complexity?",
+    "options": [
+      "A. Extract max k times",
+      "B. Convert heap to array and sort",
+      "C. Use a min-heap of size k",
+      "D. Modify the heap into a BST"
+    ],
+    "answer": "C. Use a min-heap of size k"
+  },
+  {
+    "question": "A weighted graph contains negative edges but no negative cycles. Which shortest-path algorithm guarantees correctness?",
+    "options": [
+      "A. Dijkstra’s algorithm",
+      "B. BFS",
+      "C. Bellman–Ford, because it handles negative weights without negative cycles",
+      "D. Floyd–Warshall, because it is optimal for directed acyclic graphs"
+    ],
+    "answer": "C. Bellman–Ford, because it handles negative weights without negative cycles"
+  },
+  {
+    "question": "Which data structure is MOST appropriate for prefix-based searching (auto-suggestions)?",
+    "options": [
+      "A. Hash table",
+      "B. Trie (Prefix Tree), because it supports O(L) prefix lookup",
+      "C. Balanced BST",
+      "D. Heap"
+    ],
+    "answer": "B. Trie (Prefix Tree), because it supports O(L) prefix lookup"
+  },
+  {
+    "question": "A dynamic array doubles its capacity when full. Using amortized analysis, evaluate the insertion cost.",
+    "options": [
+      "A. Insertion always takes O(n)",
+      "B. Most inserts are O(1), giving amortized O(1)",
+      "C. Correct only when array remains full",
+      "D. Insertion cost is unpredictable"
+    ],
+    "answer": "B. Most inserts are O(1), giving amortized O(1)"
+  },
+  {
+    "question": "A compiler checks nested parentheses, braces, and brackets. Which data structure is appropriate and why?",
+    "options": [
+      "A. Queue",
+      "B. Stack, because it ensures LIFO matching",
+      "C. Graph",
+      "D. Hash table"
+    ],
+    "answer": "B. Stack, because it ensures LIFO matching"
+  },
+
+  {
+    "question": "What is the final output of the following code?\n```python\narr = [2, 5, 8, 11, 14, 17]\nresult = []\nfor x in arr:\n    if x % 2 == 0:\n        result.append(x * x)\n    else:\n        continue\nprint(result)\n```",
+    "options": [
+      "A. [4, 25, 64, 121, 196, 289]",
+      "B. [4, 64, 196]",
+      "C. [2, 8, 14]",
+      "D. [4, 64, 121]"
+    ],
+    "answer": "B. [4, 64, 196]"
+  },
+  {
+    "question": "What is printed?\n```python\nx = [[1, 2], [3, 4]]\ny = x\ny[0][1] = 99\nprint(x)\n```",
+    "options": [
+      "A. [[1, 99], [3, 4]]",
+      "B. [[1, 2], [3, 4]]",
+      "C. [[99, 2], [3, 4]]",
+      "D. Error"
+    ],
+    "answer": "A. [[1, 99], [3, 4]]"
+  },
+  {
+    "question": "What does the following code print?\n```python\ndef compute(a, b=4, *args, **kwargs):\n    return a + b + len(args) + len(kwargs)\nprint(compute(2, 3, 10, 20, x=1, y=2))\n```",
+    "options": [
+      "A. 6",
+      "B. 9",
+      "C. 11",
+      "D. 13"
+    ],
+    "answer": "D. 13"
+  },
+  {
+    "question": "What does this dictionary comprehension produce?\n```python\ndata = {'a': 1, 'b': 2, 'c': 3}\nnew = {k: v*2 for k, v in data.items() if v % 2 == 1}\nprint(new)\n```",
+    "options": [
+      "A. {'a': 2, 'c': 6}",
+      "B. {'b': 4}",
+      "C. {'a': 1, 'b': 2, 'c': 3}",
+      "D. {}"
+    ],
+    "answer": "A. {'a': 2, 'c': 6}"
+  },
+  {
+    "question": "What is printed?\n```python\ntry:\n    x = 5 / 0\nexcept ZeroDivisionError:\n    print(\"Error occurred\")\nfinally:\n    print(\"Done\")\n```",
+    "options": [
+      "A. Done",
+      "B. Error occurred",
+      "C. Error occurred\nDone",
+      "D. Runtime Exception"
+    ],
+    "answer": "C. Error occurred\nDone"
+  },
+  {
+    "question": "What is the result of the tuple unpacking?\n```python\na, b, *c = [10, 20, 30, 40, 50]\nprint(a, b, c)\n```",
+    "options": [
+      "A. 10 20 [30, 40, 50]",
+      "B. 10 [20, 30] [40, 50]",
+      "C. [10, 20] [30, 40, 50]",
+      "D. Error"
+    ],
+    "answer": "A. 10 20 [30, 40, 50]"
+  },
+  {
+    "question": "What is printed?\n```python\ns = \"hello\"\nt = s\ns = s + \" world\"\nprint(t)\n```",
+    "options": [
+      "A. \"hello\"",
+      "B. \"hello world\"",
+      "C. \"\"",
+      "D. Error"
+    ],
+    "answer": "A. \"hello\""
+  },
+  {
+    "question": "What is the output?\n```python\nnums = {1, 2, 3, 4, 5}\nnew = {x*x for x in nums if x % 2 == 1}\nprint(new)\n```",
+    "options": [
+      "A. {1, 4, 9, 16, 25}",
+      "B. {1, 9, 25}",
+      "C. {2, 4}",
+      "D. {3, 9}"
+    ],
+    "answer": "B. {1, 9, 25}"
+  },
+  {
+    "question": "Does the following code avoid the mutable default argument bug?\n```python\ndef append_item(x, lst=[]):\n    if lst == []:\n        lst = []\n    lst.append(x)\n    return lst\nprint(append_item(1))\nprint(append_item(2))\n```",
+    "options": [
+      "A. The code is correct; each call creates a new list",
+      "B. The code is still incorrect; the default list persists across calls",
+      "C. The code throws an error",
+      "D. This code works only if integers are used"
+    ],
+    "answer": "B. The code is still incorrect; the default list persists across calls"
+  },
+  {
+    "question": "A student claims the following code prints 20. Is the claim correct?\n```python\nx = 10\ndef fun(x):\n    x = x + 10\n    return x\nprint(fun(x))\n```",
+    "options": [
+      "A. Correct: It prints 20",
+      "B. Incorrect: It prints 10",
+      "C. Incorrect: It prints 0",
+      "D. Incorrect: It throws an error"
+    ],
+    "answer": "A. Correct: It prints 20"
+  },
+
+  {
+    "question": "A machine fails today with probability 0.08. If it fails today, it fails tomorrow with probability 0.3, otherwise with probability 0.08. What is the probability it fails tomorrow?",
+    "options": [
+      "A. 0.08",
+      "B. 0.1024",
+      "C. 0.3",
+      "D. 0.38"
+    ],
+    "answer": "B. 0.1024"
+  },
+  {
+    "question": "A committee of 4 is formed from 7 teachers and 5 students. At least 2 teachers must be included. How many committees are possible?",
+    "options": [
+      "A. 350",
+      "B. 525",
+      "C. 450",
+      "D. 700"
+    ],
+    "answer": "B. 525"
+  },
+  {
+    "question": "A cooling system has efficiency function $$E(t) = t^3 - 6t^2 + 9t + 4$$. At what value of t is efficiency maximized?",
+    "options": [
+      "A. 0",
+      "B. 1",
+      "C. 2",
+      "D. 3"
+    ],
+    "answer": "B. 1"
+  },
+  {
+    "question": "For what value of k does the system have infinitely many solutions?\n\n$$2x + 4y = 6k$$\n$$x + 2ky = 3k$$",
+    "options": [
+      "A. k = 1",
+      "B. k = 2",
+      "C. k = 3",
+      "D. All non-zero k"
+    ],
+    "answer": "A. k = 1"
+  },
+  {
+    "question": "Does this system have a unique, no, or infinitely many solutions?\n\n$$3x + 6y = 12$$\n$$x + 2y = 4$$",
+    "options": [
+      "A. Unique solution",
+      "B. No solution",
+      "C. Infinitely many solutions",
+      "D. Cannot be determined"
+    ],
+    "answer": "C. Infinitely many solutions"
+  },
+  {
+    "question": "Solve the system:\n\n$$2x - y = 14$$\n$$x + y = 11$$",
+    "options": [
+      "A. (2, -3)",
+      "B. (1, 5)",
+      "C. (3, -1)",
+      "D. (2, 7)"
+    ],
+    "answer": "C. (3, -1)"
+  },
+  {
+    "question": "Are vectors $$u = (2, -1, 1)$$ and $$v = (1, 2, -2)$$ orthogonal?",
+    "options": [
+      "A. Yes, dot product = 0",
+      "B. No, dot product = 2",
+      "C. No, dot product = -3",
+      "D. Yes, both are unit vectors"
+    ],
+    "answer": "C. No, dot product = -3"
+  },
+  {
+    "question": "A drone chooses 1 route from 10 each day; 3 routes have turbulence. Over 7 days, what is the probability it encounters turbulence at least once?",
+    "options": [
+      "A. 0.30",
+      "B. 0.80",
+      "C. 0.65",
+      "D. 0.97"
+    ],
+    "answer": "D. 0.97"
+  },
+  {
+    "question": "Given sets:\n\nA = {f(x) = ax + b | a, b ∈ Z, a > 0}\n\nB = {f(x) = mx + n | m, n ∈ Z, m even}\n\nWhat is A ∩ B?",
+    "options": [
+      "A. Linear functions with integer coefficients",
+      "B. All constant functions",
+      "C. Empty set",
+      "D. All linear functions with positive, even slope"
+    ],
+    "answer": "D. All linear functions with positive, even slope"
+  },
+  {
+    "question": "For which value(s) of k is the matrix singular?<br><br>A = [k&nbsp;&nbsp;2]<br><br>[3&nbsp;&nbsp;6]",
+    "options": [
+      "A. k = 3",
+      "B. k = 4",
+      "C. k = 6",
+      "D. k = 0"
+    ],
+    "answer": "A. k = 3"
   }
+
 ]

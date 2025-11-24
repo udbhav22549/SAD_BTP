@@ -55,8 +55,8 @@ async function loop() {
         }
     }
 
-    // Loop at 5 FPS (Every 200ms)
-    setTimeout(loop, 200);
+    // Loop at 30 FPS (Every 33ms)
+    setTimeout(loop, 33);
 }
 
 export async function stopCameraRecording() {

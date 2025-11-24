@@ -1,0 +1,42 @@
+[
+  {
+    "question": "A B-Tree of order m stores keys in each internal node. Which of the following statements is always true?",
+    "options": [
+      "A. All leaves are at the same depth",
+      "B. Each internal node contains at most m children and at least m children",
+      "C. Insertion always increases height",
+      "D. Deletion never decreases height"
+    ],
+    "answer": "A. All leaves are at the same depth"
+  },
+  {
+    "question": "In a directed graph representing task dependencies, the graph contains exactly one cycle. Which statement is necessarily true?",
+    "options": [
+      "A. BFS tree will contain the cycle",
+      "B. All nodes in the cycle have equal indegree",
+      "C. Removing any node of the cycle makes it acyclic",
+      "D. Removing any one edge of the cycle makes the graph acyclic"
+    ],
+    "answer": "D. Removing any one edge of the cycle makes the graph acyclic"
+  },
+  {
+    "question": "A workflow graph contains exactly one directed cycle while all other parts are acyclic. Which statement is necessarily always true?",
+    "options": [
+      "A. Every node in the cycle has at least two incoming edges",
+      "B. Removing any single node from the cycle will break all cycles",
+      "C. Removing any single edge in the cycle will make the entire graph acyclic",
+      "D. BFS from any node in the cycle will detect the cycle immediately"
+    ],
+    "answer": "C. Removing any single edge in the cycle will make the entire graph acyclic"
+  },
+  {
+    "question": "For which value(s) of k is the matrix singular?<br><br>A = [k&nbsp;&nbsp;2]<br><br>[3&nbsp;&nbsp;6]",
+    "options": [
+      "A. k = 3",
+      "B. k = 4",
+      "C. k = 6",
+      "D. k = 0"
+    ],
+    "answer": "A. k = 3"
+  }
+]
