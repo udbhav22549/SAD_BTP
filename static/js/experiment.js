@@ -7,19 +7,35 @@ document.addEventListener("DOMContentLoaded", () => {
     let sessionStartTime = null;
     window.currentInterval = null;
 
-    // for mcq 
+    // --- Global Timer Variables ---
+    let globalTimerInterval = null;
+    const globalTimerBar = document.getElementById('globalTimer');
+
+    // --- MCQ Data ---
     let mcqQuestions = [];
-    let mcqAnswers = {}; // store user’s selected answers
+    let mcqAnswers = {}; 
     let currentMcqIndex = 0;
+    let mcqVisited = new Set();
+    let mcqPrevAnswer = {}; 
+    let lastMcqIndex = null; 
+    let mcqMarked = {};
 
-    let mcqVisited = new Set(); // track which questions user saw
-    let mcqPrevAnswer = {}; // track last answer for change detection
-    let lastMcqIndex = null; // track movement
-
+    // --- Feedback Data ---
     let feedbackQuestions = [];
     let firstSeenTime = {};
-    let mcqMarked = {};  // Track which questions are marked for review
+    let feedbackIndex = 0;
+    let feedbackData = {
+        confidence: [],
+        guess: [],
+        guessType: []
+    };
 
+    // --- Image Task Data ---
+    let imageIndex = 0;
+    let imageDescriptions = [];
+    const imageList = ["/static/stage_5_img_0.jpg", "/static/stage_5_img_1.jpg"];
+
+    // --- DOM Elements ---
     const container = document.getElementById('container');
     const alertSound = document.getElementById('alertSound');
     const endBtn = document.getElementById('endBtn');
@@ -28,19 +44,52 @@ document.addEventListener("DOMContentLoaded", () => {
     let paragraphText = "";
     let questions = [];
 
-    let feedbackIndex = 0;
-    let feedbackData = {
-        confidence: [],
-        guess: [],
-        guessType: []
-    };
-
-    let imageIndex = 0;
-    let imageDescriptions = [];
-    const imageList = ["/static/stage_5_img_0.jpg", "/static/stage_5_img_1.jpg"];
-
     let cameraModulesLoaded = false;
     let initFaceModel, setupCamera, startCameraRecording, stopCameraRecording;
+
+    // ==========================================
+    //  NEW: GLOBAL TIMER FUNCTIONS
+    // ==========================================
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${m}:${s.toString().padStart(2, "0")}`;
+    }
+
+    function startGlobalTimer(totalSeconds, label, onEnd) {
+        if (!globalTimerBar) return;
+
+        // Clear existing
+        if (globalTimerInterval) clearInterval(globalTimerInterval);
+        
+        let remaining = totalSeconds;
+        globalTimerBar.classList.remove("hidden");
+        globalTimerBar.style.display = "block"; // Force show
+        globalTimerBar.textContent = `${label} — ${formatTime(remaining)}`;
+
+        globalTimerInterval = setInterval(() => {
+            remaining--;
+            if (remaining < 0) {
+                clearInterval(globalTimerInterval);
+                globalTimerBar.textContent = `${label} — 0:00`;
+                if (typeof onEnd === "function") onEnd();
+            } else {
+                globalTimerBar.textContent = `${label} — ${formatTime(remaining)}`;
+            }
+        }, 1000);
+    }
+
+    function clearGlobalTimer() {
+        if (globalTimerInterval) clearInterval(globalTimerInterval);
+        if (globalTimerBar) {
+            globalTimerBar.classList.add("hidden");
+            globalTimerBar.style.display = "none";
+        }
+    }
+
+    // ==========================================
+    //  EXISTING LOADING LOGIC
+    // ==========================================
 
     async function loadCameraModules() {
         if (cameraModulesLoaded) return;
@@ -65,129 +114,125 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Camera modules loaded.");
     }
 
-
-    // Fetch paragraph and questions from backend
-
     async function loadExperimentData() {
-    const [paraRes, quesRes, mcqRes, fbRes] = await Promise.all([
-        fetch('/get_paragraph'),
-        fetch('/get_questions'),
-        fetch('/get_mcq_questions'),
-        fetch('/get_feedback_questions')
-    ]);
+        const [paraRes, quesRes, mcqRes, fbRes] = await Promise.all([
+            fetch('/get_paragraph'),
+            fetch('/get_questions'),
+            fetch('/get_mcq_questions'),
+            fetch('/get_feedback_questions')
+        ]);
 
-    const paraData = await paraRes.json();
-    const quesData = await quesRes.json();
-    const mcqData = await mcqRes.json();
-    const fbData = await fbRes.json();
+        const paraData = await paraRes.json();
+        const quesData = await quesRes.json();
+        const mcqData = await mcqRes.json();
+        const fbData = await fbRes.json();
 
-    paragraphText = paraData.paragraph;
-    questions = quesData.questions;
-    mcqQuestions = mcqData.questions;
-    feedbackQuestions = fbData.questions;
+        paragraphText = paraData.paragraph;
+        questions = quesData.questions;
+        mcqQuestions = mcqData.questions;
+        feedbackQuestions = fbData.questions;
 
-
-    console.log("Loaded paragraph:", paragraphText);
-    console.log("Loaded subjective questions:", questions.length);
-    console.log("Loaded MCQs:", mcqQuestions.length);
-    console.log("Loaded Feedback:", feedbackQuestions.length);
+        console.log("Loaded paragraph:", paragraphText);
+        console.log("Loaded subjective questions:", questions.length);
+        console.log("Loaded MCQs:", mcqQuestions.length);
+        console.log("Loaded Feedback:", feedbackQuestions.length);
     }
 
-
-    // Call it before experiment starts
     loadExperimentData();
 
     function getISTTimestamp() {
-    const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-    const ist = new Date(utc + 5.5 * 60 * 60 * 1000);
-    const year = ist.getFullYear();
-    const month = String(ist.getMonth() + 1).padStart(2, '0');
-    const day = String(ist.getDate()).padStart(2, '0');
-    const hours = String(ist.getHours()).padStart(2, '0');
-    const minutes = String(ist.getMinutes()).padStart(2, '0');
-    const seconds = String(ist.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} IST`;
+        const now = new Date();
+        const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+        const ist = new Date(utc + 5.5 * 60 * 60 * 1000);
+        return ist.toISOString().replace("T", " ").split(".")[0] + " IST"; // Simple format
     }
 
     function getElapsedSeconds() {
-    if (!sessionStartTime) return 0;
-    return Math.floor((Date.now() - sessionStartTime) / 1000);
+        if (!sessionStartTime) return 0;
+        return Math.floor((Date.now() - sessionStartTime) / 1000);
     }
 
     function logEvent(stage, variable_field = {}) {
-    const payload = {
-        stage: stage,
-        timestamp: getISTTimestamp(),
-        time_elapsed: getElapsedSeconds(),
-        variable_field: variable_field
-    };
-    console.log("Logging event:", payload);
-    fetch('/log_event', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-    }).catch(err => console.warn('logEvent failed', err));
+        const payload = {
+            stage: stage,
+            timestamp: getISTTimestamp(),
+            time_elapsed: getElapsedSeconds(),
+            variable_field: variable_field
+        };
+        console.log("Logging event:", payload);
+        fetch('/log_event', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        }).catch(err => console.warn('logEvent failed', err));
     }
 
     function toggleEndSession(show) {
-    document.getElementById("endBtn").style.display = show ? 'inline-block' : 'none';
+        document.getElementById("endBtn").style.display = show ? 'inline-block' : 'none';
     }
     function toggleExit(show) {
         document.getElementById("exitBtn").style.display = show ? 'inline-block' : 'none';
     }
 
+    // ==========================================
+    //  START SCREEN
+    // ==========================================
+
     function renderStartScreen() {
-    sessionActive = false;
-    sessionEnded = false;
-    currentQuestion = 0;
-    currentScreen = "start";
-    sessionStartTime = null;
-    container.innerHTML = `
-        <button id="startBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg text-2xl">
-        Start Experiment
-        </button>
-    `;
-    sessionActive = false;
-    toggleEndSession(false);  // hide End Session
-    toggleExit(true);         // Exit visible only here
+        sessionActive = false;
+        sessionEnded = false;
+        currentQuestion = 0;
+        currentScreen = "start";
+        sessionStartTime = null;
+        // container.innerHTML = `
+        //     <button id="startBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg text-2xl">
+        //     Start Experiment
+        //     </button>
+        // `;
+        
+        // --- FIX: Attach listener so button works ---
+        document.getElementById("startBtn").addEventListener("click", startNewSession);
+        
+        sessionActive = false;
+        toggleEndSession(false);
+        toggleExit(true);
     }
 
+    // Keep your old startTimer for internal use if needed (local display)
     function startTimer(duration, onEnd, displayText, showNext = false) {
-    let timeLeft = duration;
-    container.innerHTML = `
-        <h1 class="text-3xl font-semibold mb-6">${displayText}</h1>
-        <div class="text-6xl font-bold mb-6" id="countdown">${timeLeft}</div>
-        <div class="w-full bg-gray-300 rounded-full h-6 mb-6">
-        <div id="progressBar" class="bg-green-500 h-6 rounded-full w-0"></div>
-        </div>
-        ${showNext ? '<button id="nextBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg text-lg">Next</button>' : ''}
-    `;
+        let timeLeft = duration;
+        container.innerHTML = `
+            <h1 class="text-3xl font-semibold mb-6">${displayText}</h1>
+            <div class="text-6xl font-bold mb-6" id="countdown">${timeLeft}</div>
+            <div class="w-full bg-gray-300 rounded-full h-6 mb-6">
+            <div id="progressBar" class="bg-green-500 h-6 rounded-full w-0"></div>
+            </div>
+            ${showNext ? '<button id="nextBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg text-lg">Next</button>' : ''}
+        `;
 
-    const progressBar = document.getElementById('progressBar');
+        const progressBar = document.getElementById('progressBar');
 
-    if(window.currentInterval) clearInterval(window.currentInterval);
-    window.currentInterval = setInterval(() => {
-        timeLeft--;
-        const countdownEl = document.getElementById('countdown');
-        if(countdownEl) countdownEl.textContent = timeLeft;
-        if(progressBar) progressBar.style.width = `${((duration - timeLeft)/duration)*100}%`;
-        if(timeLeft <= 0) {
-        clearInterval(window.currentInterval);
-        window.currentInterval = null;
-        onEnd();
+        if(window.currentInterval) clearInterval(window.currentInterval);
+        window.currentInterval = setInterval(() => {
+            timeLeft--;
+            const countdownEl = document.getElementById('countdown');
+            if(countdownEl) countdownEl.textContent = timeLeft;
+            if(progressBar) progressBar.style.width = `${((duration - timeLeft)/duration)*100}%`;
+            if(timeLeft <= 0) {
+            clearInterval(window.currentInterval);
+            window.currentInterval = null;
+            onEnd();
+            }
+        }, 1000);
+
+        if (showNext) {
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.addEventListener('click', () => {
+            clearInterval(window.currentInterval);
+            window.currentInterval = null;
+            onEnd(); 
+            });
         }
-    }, 1000);
-
-    // Handle manual next button
-    if (showNext) {
-        const nextBtn = document.getElementById('nextBtn');
-        nextBtn.addEventListener('click', () => {
-        clearInterval(window.currentInterval);
-        window.currentInterval = null;
-        onEnd();  // same behavior as timer finishing
-        });
-    }
     }
 
     async function startNewSession() {
@@ -195,25 +240,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         await loadCameraModules();
         await initFaceModel();
-
-        // --- CHANGED SECTION ---
-        const videoElement = document.getElementById("videoCam"); // Get the HTML element
-        if (!videoElement) {
-            alert("Critical Error: Video element not found in HTML. Camera log will fail.");
-            return;
-        }
-
-        await setupCamera(); // This turns the webcam on
         
-        // -----------------------
+        // Fix: get video element before setup
+        const videoElement = document.getElementById("videoCam");
+        if (!videoElement) return alert("Video element missing");
+
+        await setupCamera();
+        
         const resp = await fetch('/start_session', { method: 'POST' });
         if (!resp.ok) {
             if (resp.status === 401) window.location.href = '/login';
             return;
         }
 
-        startCameraRecording(videoElement); // Pass it to the recorder!
-        
+        // Fix: pass element to recorder
+        startCameraRecording(videoElement);
+
         sessionStartTime = Date.now();
         logEvent('session_started');
         sessionActive = true;
@@ -222,6 +264,10 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleExit(false);
         startEyesClosed();
     }
+
+    // ==========================================
+    //  STAGES WITH TIMERS ADDED
+    // ==========================================
 
     function startEyesClosed() {
         currentScreen = "eyes_closed";
@@ -235,140 +281,155 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showParagraph() {
-    currentScreen = "paragraph";
-    const paragraph = paragraphText || "Default paragraph text.";
+        currentScreen = "paragraph";
+        const paragraph = paragraphText || "Default paragraph text.";
 
-    // Display paragraph without timer
-    container.innerHTML = `
-        <h1 class="text-2xl font-semibold mb-6">Please read the following paragraph carefully:</h1>
-        <p class="text-lg text-gray-700 mb-8">${paragraph}</p>
-        <button id="nextParagraphBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
-        Next
-        </button>
-    `;
+        // --- TIMER: 1 Minute 30 Seconds (90s) ---
+        startGlobalTimer(90, "Stage-1", () => {
+            logEvent("speech_baseline_timeout");
+            showQuestion();
+        });
 
-    // When Next is clicked, move to questions
-    document.getElementById('nextParagraphBtn').addEventListener('click', () => {
-        logEvent('paragraph_finished');
-        // alertSound.play();
-        showQuestion();
-    });
-    toggleExit(false);
-    toggleEndSession(true);
+        container.innerHTML = `
+            <h1 class="text-2xl font-semibold mb-6">Please read the following paragraph carefully:</h1>
+            <p class="text-lg text-gray-700 mb-8">${paragraph}</p>
+            <button id="nextParagraphBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
+            Next
+            </button>
+        `;
 
+        document.getElementById('nextParagraphBtn').addEventListener('click', () => {
+            logEvent('paragraph_finished');
+            alertSound.play();
+            showQuestion();
+        });
+        toggleExit(false);
+        toggleEndSession(true);
     }
 
     function showQuestion() {
-    //  if(currentQuestion >= questions.length) {
-    //    sessionActive = false;
-    //    sessionEnded = true;
-    //    toggleLogout(true);
-    //    toggleEndSession(false);
-    //    container.innerHTML = `
-    //      <h1 class="text-4xl font-bold text-green-600">Experiment Finished</h1>
-    //      <p class="mt-4 text-lg text-gray-700">Thank you for participating!</p>
-    //      <button id="newExpBtn" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">Start New Experiment</button>
-    //    `;
-    //    return;
-    if(currentQuestion >= questions.length) {
-        //alertSound.play();
-        logEvent('subjective_section_finished');
-        showMcqSection();
-        return;
-    }
-    const q = questions[currentQuestion];
-    startTimer(15, () => {
-        //alertSound.play();
-        logEvent(`question_${currentQuestion+1}_finished`);
-        currentQuestion++;
-        setTimeout(showQuestion, 300);
-    }, q, true); // ✅ manual next enabled
-    toggleExit(false);
-    toggleEndSession(true);
+        
+        // --- LOGIC TO START STAGE TIMERS ---
+        // Q1 (Index 0): Start 8 Minute Timer for first 4 questions
+        if (currentQuestion === 0) {
+            startGlobalTimer(8 * 60, "Stage-2", () => {
+                logEvent("stage2_timeout");
+                currentQuestion = 4; // Jump to next set
+                showQuestion();
+            });
+        } 
+        // Q5 (Index 4): Start 10 Minute Timer for next 4 questions
+        else if (currentQuestion === 4) {
+            startGlobalTimer(10 * 60, "Stage-3", () => {
+                logEvent("stage3_timeout");
+                showMcqSection(); // Jump to MCQ
+            });
+        }
+
+        if(currentQuestion >= questions.length) {
+            logEvent('subjective_section_finished');
+            showMcqSection();
+            return;
+        }
+
+        // NOTE: I replaced your local startTimer(15) with the display code below
+        // because the 8/10 minute section timers override the 15s per-question timer.
+        const q = questions[currentQuestion];
+        
+        container.innerHTML = `
+            <h1 class="text-3xl font-bold mb-6">Question ${currentQuestion + 1}</h1>
+            <p class="text-xl mb-6">${q}</p>
+            <button id="nextQuestionBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg text-lg">Next</button>
+        `;
+
+        document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+            logEvent(`question_${currentQuestion+1}_finished`);
+            currentQuestion++;
+            showQuestion();
+        });
+
+        toggleExit(false);
+        toggleEndSession(true);
     }
 
     function showMcqSection() {
-    currentScreen = "mcq_section";
-    currentMcqIndex = 0;
-    mcqAnswers = {};
+        currentScreen = "mcq_section";
+        currentMcqIndex = 0;
+        mcqAnswers = {};
 
-    container.innerHTML = `
-        <h1 class="text-3xl font-bold mb-6">MCQ Section</h1>
-
-        <!-- Navigation Panel -->
-        <div id="mcqNav" class="grid grid-cols-10 gap-2 mb-6"></div>
-
-        <!-- Question Display -->
-        <div id="mcqContainer"></div>
-
-        <div class="mt-6">
-        <button id="prevMcq" class="bg-gray-400 text-white font-bold py-2 px-4 rounded mr-2">Previous</button>
-        <button id="nextMcq" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Next</button>
-        <button id="submitMcqs" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2">Submit</button>
-        </div>
-    `;
-
-    renderMcqNav();
-    renderMcqQuestion();
-    toggleExit(false);
-    toggleEndSession(true);
-    }
-
-function renderMcqNav() {
-    const navContainer = document.getElementById('mcqNav');
-    if (!navContainer) return;
-
-    let navButtons = '';
-
-    for (let i = 0; i < mcqQuestions.length; i++) {
-        const isMarked = mcqMarked[i];
-        const isAnswered = mcqAnswers[i] !== null && mcqAnswers[i] !== undefined;
-
-        // Base classes
-        let classes = "rounded-full w-10 h-10 flex items-center justify-center font-semibold transition border ";
-
-        // Yellow-orange scheme
-        if (isMarked && isAnswered) {
-            // Marked & answered → solid orange
-            classes += "bg-amber-500 text-white border-amber-600";
-        } else if (isMarked) {
-            // Marked only → orange outline
-            classes += "border-amber-500 text-amber-600 bg-white";
-        } else if (isAnswered) {
-            // Answered only → green
-            classes += "bg-green-500 text-white border-green-600";
-        } else {
-            // Not visited / unanswered
-            classes += "border-gray-300 text-gray-700 bg-gray-100";
-        }
-
-        // Highlight current question with thicker border
-        if (i === currentMcqIndex) {
-            classes += " ring-2 ring-indigo-500";
-        }
-
-        navButtons += `
-            <button data-index="${i}"
-                    class="${classes}">
-                ${i + 1}
-            </button>
-        `;
-    }
-
-    navContainer.innerHTML = navButtons;
-
-    // Add event listeners to jump to a question
-    document.querySelectorAll('#mcqNav button').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const selected = document.querySelector('input[name="mcq"]:checked');
-            if (selected) mcqAnswers[currentMcqIndex] = selected.value;
-
-            const newIndex = parseInt(e.target.dataset.index, 10);
-            currentMcqIndex = newIndex;
-            renderMcqQuestion();
+        // --- TIMER: 30 Minutes ---
+        startGlobalTimer(30 * 60, "Stage-4", () => {
+            logEvent("mcq_timeout");
+            showFeedbackForm();
         });
-    });
-}
+
+        container.innerHTML = `
+            <h1 class="text-3xl font-bold mb-6">MCQ Section</h1>
+
+            <div id="mcqNav" class="grid grid-cols-10 gap-2 mb-6"></div>
+
+            <div id="mcqContainer"></div>
+
+            <div class="mt-6">
+            <button id="prevMcq" class="bg-gray-400 text-white font-bold py-2 px-4 rounded mr-2">Previous</button>
+            <button id="nextMcq" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Next</button>
+            <button id="submitMcqs" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2">Submit</button>
+            </div>
+        `;
+
+        renderMcqNav();
+        renderMcqQuestion();
+        toggleExit(false);
+        toggleEndSession(true);
+    }
+
+    function renderMcqNav() {
+        const navContainer = document.getElementById('mcqNav');
+        if (!navContainer) return;
+
+        let navButtons = '';
+
+        for (let i = 0; i < mcqQuestions.length; i++) {
+            const isMarked = mcqMarked[i];
+            const isAnswered = mcqAnswers[i] !== null && mcqAnswers[i] !== undefined;
+
+            let classes = "rounded-full w-10 h-10 flex items-center justify-center font-semibold transition border ";
+
+            if (isMarked && isAnswered) {
+                classes += "bg-amber-500 text-white border-amber-600";
+            } else if (isMarked) {
+                classes += "border-amber-500 text-amber-600 bg-white";
+            } else if (isAnswered) {
+                classes += "bg-green-500 text-white border-green-600";
+            } else {
+                classes += "border-gray-300 text-gray-700 bg-gray-100";
+            }
+
+            if (i === currentMcqIndex) {
+                classes += " ring-2 ring-indigo-500";
+            }
+
+            navButtons += `
+                <button data-index="${i}"
+                        class="${classes}">
+                    ${i + 1}
+                </button>
+            `;
+        }
+
+        navContainer.innerHTML = navButtons;
+
+        document.querySelectorAll('#mcqNav button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const selected = document.querySelector('input[name="mcq"]:checked');
+                if (selected) mcqAnswers[currentMcqIndex] = selected.value;
+
+                const newIndex = parseInt(e.target.dataset.index, 10);
+                currentMcqIndex = newIndex;
+                renderMcqQuestion();
+            });
+        });
+    }
 
     function renderMcqQuestion() {
         const q = mcqQuestions[currentMcqIndex];
@@ -376,12 +437,10 @@ function renderMcqNav() {
         const mcqContainer = document.getElementById('mcqContainer');
         if (!mcqContainer || !q) return;
 
-        // Track first time seen
         if (!firstSeenTime[currentMcqIndex]) {
             firstSeenTime[currentMcqIndex] = getElapsedSeconds();
         }
 
-        // Log first seen
         if (!mcqVisited.has(currentMcqIndex)) {
             mcqVisited.add(currentMcqIndex);
             logEvent("Qfirstseen", {
@@ -390,7 +449,6 @@ function renderMcqNav() {
             });
         }
 
-        // Log question change (when moving from one to another)
         if (lastMcqIndex !== null && lastMcqIndex !== currentMcqIndex) {
             logEvent("QChange", {
                 Qn: lastMcqIndex,
@@ -400,7 +458,6 @@ function renderMcqNav() {
         }
         lastMcqIndex = currentMcqIndex;
 
-        // Render options
         const optionsHtml = q.options.map(opt => `
             <label class="block text-left border rounded-lg p-2 mb-2 cursor-pointer hover:bg-gray-100">
                 <input type="radio" name="mcq" value="${opt}" ${savedAnswer === opt ? 'checked' : ''} class="mr-2">
@@ -409,15 +466,13 @@ function renderMcqNav() {
         `).join('');
 
         mcqContainer.innerHTML = `
-            <h2 class="text-xl font-semibold mb-4">Q${currentMcqIndex + 1}.</h2>
-            <div class="text-left mb-4 markdown-content">${marked.parse(q.question)}</div>
+            <h2 class="text-xl font-semibold mb-4">Q${currentMcqIndex + 1}. ${q.question}</h2>
             ${optionsHtml}
             <button id="markBtn" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded">
                 ${mcqMarked[currentMcqIndex] ? "Unmark" : "Mark for Review"}
             </button>
         `;
 
-        // Update nav + prev / next / submit buttons
         renderMcqNav();
 
         const prevBtn = document.getElementById('prevMcq');
@@ -435,7 +490,6 @@ function renderMcqNav() {
             if (submitBtn) submitBtn.classList.add('hidden');
         }
 
-        // Handle answer selection
         document.querySelectorAll('input[name="mcq"]').forEach(input => {
             input.addEventListener('change', () => {
                 const selected = input.value;
@@ -456,7 +510,6 @@ function renderMcqNav() {
             });
         });
 
-        // Handle Mark / Unmark
         const markBtn = document.getElementById("markBtn");
         if (markBtn) {
             markBtn.addEventListener("click", () => {
@@ -467,49 +520,42 @@ function renderMcqNav() {
                     Marked: mcqMarked[currentMcqIndex]
                 });
 
-                // Re-render to update button text & nav color
                 renderMcqQuestion();
             });
         }
-
-        if (window.MathJax) {
-            MathJax.typesetPromise();
-        }
-
     }
 
     container.addEventListener('click', (e) => {
-    if (e.target.id === 'nextMcq') {
-        const selected = document.querySelector('input[name="mcq"]:checked');
-        if (selected) mcqAnswers[currentMcqIndex] = selected.value;
-        if (currentMcqIndex < mcqQuestions.length - 1) {
-        currentMcqIndex++;
-        renderMcqQuestion();
-        }
-    }
-
-    if (e.target.id === 'prevMcq') {
-        const selected = document.querySelector('input[name="mcq"]:checked');
-        if (selected) mcqAnswers[currentMcqIndex] = selected.value;
-        if (currentMcqIndex > 0) {
-        currentMcqIndex--;
-        renderMcqQuestion();
-        }
-    }
-
-    if (e.target.id === 'submitMcqs') {
-        const selected = document.querySelector('input[name="mcq"]:checked');
-        if (selected) mcqAnswers[currentMcqIndex] = selected.value;
-
-        if (Object.keys(mcqAnswers).length < mcqQuestions.length) {
-        alert("Please answer all questions before submitting.");
-        return;
+        if (e.target.id === 'nextMcq') {
+            const selected = document.querySelector('input[name="mcq"]:checked');
+            if (selected) mcqAnswers[currentMcqIndex] = selected.value;
+            if (currentMcqIndex < mcqQuestions.length - 1) {
+                currentMcqIndex++;
+                renderMcqQuestion();
+            }
         }
 
-        logEvent("End", {});
-        //logEvent('mcq_section_finished');
-        showFeedbackForm();
-    }
+        if (e.target.id === 'prevMcq') {
+            const selected = document.querySelector('input[name="mcq"]:checked');
+            if (selected) mcqAnswers[currentMcqIndex] = selected.value;
+            if (currentMcqIndex > 0) {
+                currentMcqIndex--;
+                renderMcqQuestion();
+            }
+        }
+
+        if (e.target.id === 'submitMcqs') {
+            const selected = document.querySelector('input[name="mcq"]:checked');
+            if (selected) mcqAnswers[currentMcqIndex] = selected.value;
+
+            if (Object.keys(mcqAnswers).length < mcqQuestions.length) {
+                alert("Please answer all questions before submitting.");
+                return;
+            }
+
+            logEvent("End", {});
+            showFeedbackForm();
+        }
     });
 
     function showScoreCard() {
@@ -525,13 +571,11 @@ function renderMcqNav() {
             mcqAnswers[i] === q.answer ? "correct" : "incorrect"
         );
 
-        // Log final score
         logEvent("SCORE", {
             score: score,
             answerStatus: answerStatus
         });
 
-        // Show Score UI (NO feedback button)
         container.innerHTML = `
             <h1 class="text-4xl font-bold text-green-600 mb-4">Scorecard</h1>
 
@@ -552,6 +596,9 @@ function renderMcqNav() {
         currentScreen = "feedback";
         toggleExit(false);
         toggleEndSession(true);
+        
+        // Stop MCQ Timer
+        clearGlobalTimer();
 
         if (!mcqQuestions.length) {
             container.innerHTML = `<p class="text-red-600 font-bold">No MCQ questions found.</p>`;
@@ -583,8 +630,8 @@ function renderMcqNav() {
 
             <div class="mb-6">
                 <label class="font-semibold block mb-2">Confidence (1 = low, 3 = neutral, 5 = high)</label>
-                <input id="confidenceSlider" type="range" min="0" max="5" value="0" class="w-full">
-                <p id="confValue" class="mt-1 text-gray-700">0</p>
+                <input id="confidenceSlider" type="range" min="1" max="5" value="3" class="w-full">
+                <p id="confValue" class="mt-1 text-gray-700">3</p>
             </div>
 
             <div class="mb-6">
@@ -614,12 +661,10 @@ function renderMcqNav() {
             </div>
         `;
 
-        // update slider display
         document.getElementById("confidenceSlider").addEventListener("input", (e) => {
             document.getElementById("confValue").textContent = e.target.value;
         });
 
-        // handle next/submit button clicks
         if (document.getElementById("nextFeedback")) {
             document.getElementById("nextFeedback").addEventListener("click", saveFeedbackAndNext);
         }
@@ -634,7 +679,7 @@ function renderMcqNav() {
         const guessed = document.getElementById("guessSelect").value === "true";
         let type = document.getElementById("guessTypeSelect").value;
 
-        if (!guessed) type = "";  // if no guess → blank as required
+        if (!guessed) type = "";
 
         feedbackData.confidence.push(conf);
         feedbackData.guess.push(guessed);
@@ -655,12 +700,9 @@ function renderMcqNav() {
         feedbackData.guess.push(guessed);
         feedbackData.guessType.push(type);
 
-        // final log event
         logEvent("Feedback", feedbackData);
-
         console.log("Final Feedback:", feedbackData);
 
-        // Show score AFTER feedback
         showImageDescriptionTask();
     }
 
@@ -668,6 +710,19 @@ function renderMcqNav() {
         currentScreen = "image_description";
         toggleExit(false);
         toggleEndSession(true);
+
+        // --- TIMER: 10 Minutes ---
+        startGlobalTimer(10 * 60, "Stage-5", () => {
+            logEvent("image_task_timeout");
+            // End of experiment when time runs out
+            const cameraData = stopCameraRecording();
+            fetch("/save_camera_log", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ log: cameraData })
+            });
+            showScoreCard();
+        });
 
         renderImageDescription();
     }
@@ -694,23 +749,17 @@ function renderMcqNav() {
         `;
     }
 
-    
     function showCompletionScreen() {
         window.location.href = "/thankyou";
     }
 
     container.addEventListener('click', (e) => {
-        const id = e.target && e.target.id;
-
-        if (id === 'startBtn') {
+        // Start button logic moved to renderStartScreen for cleaner init
+        
+        if (e.target.id === 'newExpBtn') {
             e.preventDefault();
-            startNewSession();
         }
-        if (id === 'newExpBtn') {
-            e.preventDefault();
-            // renderStartScreen();
-        }
-        if (id === 'feedbackBtn') {
+        if (e.target.id === 'feedbackBtn') {
             e.preventDefault();
             showFeedbackForm();
         }
@@ -722,25 +771,22 @@ function renderMcqNav() {
                 return;
             }
 
-            // Save text in array
             imageDescriptions.push(text);
 
-            // Log event for this image
             logEvent("ImageDescription", {
                 image_number: imageIndex + 1,
                 description: text
             });
 
-            // If more images remain → go to next image
             if (imageIndex < imageList.length - 1) {
                 imageIndex++;
                 renderImageDescription();
                 return;
             }
 
-            // If this was the LAST image:
-            // Stop camera and send camera log
+            // Stop and Save
             const cameraData = stopCameraRecording();
+            clearGlobalTimer(); // Stop timer
 
             fetch("/save_camera_log", {
                 method: "POST",
@@ -748,10 +794,8 @@ function renderMcqNav() {
                 body: JSON.stringify({ log: cameraData })
             }).catch(err => console.error("Camera log save failed:", err));
 
-            // Show scorecard after final image
             showScoreCard();
         }
-
     });
 
     container.addEventListener('click', (e) => {
@@ -762,52 +806,20 @@ function renderMcqNav() {
         }
     });
 
-
-    document.addEventListener('submit', (e) => {
-    if (e.target.id === 'feedbackForm') {
-        e.preventDefault();
-
-        const formData = new FormData(e.target);
-        const feedback = Object.fromEntries(formData.entries());
-
-        // Log feedback event
-        logEvent("Feedback", feedback); // send as real JSON dict
-
-        console.log("Feedback received:", feedback);
-
-        // Move to final screen
-        showImageDescriptionTask();
-    }
-    });
-
-
     endBtn.addEventListener('click', () => {
         stopCameraRecording();
+        clearGlobalTimer();
         logEvent('session_ended', {});
         window.location.href = "/thankyou";
-
-        //  if (!sessionActive) return;
-        //  sessionEnded = true;
-        //  sessionActive = false;
-        //  clearInterval(window.currentInterval);
-        //  logEvent('session_ended');
-        //  toggleLogout(true);
-        //  toggleEndSession(false);
-        //  container.innerHTML = `
-        //    <h1 class="text-4xl font-bold text-red-600">Session Ended</h1>
-        //    <p class="mt-4 text-lg text-gray-700">Thank you for participating!</p>
-        //    <button id="newExpBtn" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">Start New Experiment</button>
-        //  `;
     });
-   
-    // EXIT button → go to thank you page
-    exitBtn.addEventListener("click", () => {
+    
+    exitBtn.addEventListener('click', () => {
         stopCameraRecording();
+        clearGlobalTimer();
         clearInterval(window.currentInterval);
         logEvent("EXIT", {});
         window.location.href = "/thankyou";
     });
 
-
-    // renderStartScreen();
+    renderStartScreen();
 });

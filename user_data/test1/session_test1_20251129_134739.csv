@@ -1,0 +1,33 @@
+UserID,EventType,TimeElapsed,timestamp,VariableFields
+P500ebef21d,START,0,2025-11-29T19:17:39+05:30,{}
+P500ebef21d,session_started,0,2025-11-29 13:47:39 IST,{}
+P500ebef21d,eyes_closed_finished,40,2025-11-29 13:48:20 IST,{}
+P500ebef21d,paragraph_finished,90,2025-11-29 13:49:09 IST,{}
+P500ebef21d,question_1_finished,91,2025-11-29 13:49:11 IST,{}
+P500ebef21d,question_2_finished,92,2025-11-29 13:49:12 IST,{}
+P500ebef21d,question_3_finished,93,2025-11-29 13:49:13 IST,{}
+P500ebef21d,question_4_finished,95,2025-11-29 13:49:15 IST,{}
+P500ebef21d,question_5_finished,97,2025-11-29 13:49:16 IST,{}
+P500ebef21d,question_6_finished,97,2025-11-29 13:49:17 IST,{}
+P500ebef21d,question_7_finished,98,2025-11-29 13:49:18 IST,{}
+P500ebef21d,question_8_finished,99,2025-11-29 13:49:19 IST,{}
+P500ebef21d,subjective_section_finished,99,2025-11-29 13:49:19 IST,{}
+P500ebef21d,Qfirstseen,99,2025-11-29 13:49:19 IST,"{""Qn"": 0, ""FirsttimeSeen"": 99}"
+P500ebef21d,QSubmit,101,2025-11-29 13:49:21 IST,"{""Qn"": 0, ""Soption"": ""A. All leaves are at the same depth"", ""FirsttimeSeen"": 99, ""ResponseTime"": 2}"
+P500ebef21d,QMark,103,2025-11-29 13:49:22 IST,"{""Qn"": 0, ""Marked"": true}"
+P500ebef21d,QUnmark,103,2025-11-29 13:49:23 IST,"{""Qn"": 0, ""Marked"": false}"
+P500ebef21d,Qfirstseen,104,2025-11-29 13:49:24 IST,"{""Qn"": 1, ""FirsttimeSeen"": 104}"
+P500ebef21d,QChange,104,2025-11-29 13:49:24 IST,"{""Qn"": 0, ""Qnto"": 1, ""submitted"": ""Yes""}"
+P500ebef21d,QSubmit,105,2025-11-29 13:49:25 IST,"{""Qn"": 1, ""Soption"": ""D. Removing any one edge of the cycle makes the graph acyclic"", ""FirsttimeSeen"": 104, ""ResponseTime"": 1}"
+P500ebef21d,QChange,106,2025-11-29 13:49:26 IST,"{""Qn"": 1, ""Qnto"": 2, ""submitted"": ""Yes""}"
+P500ebef21d,Qfirstseen,106,2025-11-29 13:49:26 IST,"{""Qn"": 2, ""FirsttimeSeen"": 106}"
+P500ebef21d,QSubmit,107,2025-11-29 13:49:27 IST,"{""Qn"": 2, ""Soption"": ""C. Removing any single edge in the cycle will make the entire graph acyclic"", ""FirsttimeSeen"": 106, ""ResponseTime"": 1}"
+P500ebef21d,Qfirstseen,108,2025-11-29 13:49:28 IST,"{""Qn"": 3, ""FirsttimeSeen"": 108}"
+P500ebef21d,QChange,108,2025-11-29 13:49:28 IST,"{""Qn"": 2, ""Qnto"": 3, ""submitted"": ""Yes""}"
+P500ebef21d,QSubmit,110,2025-11-29 13:49:30 IST,"{""Qn"": 3, ""Soption"": ""A. k = 3"", ""FirsttimeSeen"": 108, ""ResponseTime"": 2}"
+P500ebef21d,End,111,2025-11-29 13:49:31 IST,{}
+P500ebef21d,Feedback,116,2025-11-29 13:49:35 IST,"{""confidence"": [3, 3, 3, 3], ""guess"": [false, false, false, false], ""guessType"": ["""", """", """", """"]}"
+P500ebef21d,ImageDescription,119,2025-11-29 13:49:39 IST,"{""image_number"": 1, ""description"": ""ABAB""}"
+P500ebef21d,ImageDescription,122,2025-11-29 13:49:41 IST,"{""image_number"": 2, ""description"": ""wer""}"
+P500ebef21d,SCORE,122,2025-11-29 13:49:41 IST,"{""score"": 4, ""answerStatus"": [""correct"", ""correct"", ""correct"", ""correct""]}"
+P500ebef21d,FINISH,123,2025-11-29 13:49:43 IST,{}

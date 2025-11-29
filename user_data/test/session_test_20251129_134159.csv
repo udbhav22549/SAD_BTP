@@ -1,0 +1,5 @@
+UserID,EventType,TimeElapsed,timestamp,VariableFields
+P0b92f50c54,START,0,2025-11-29T19:11:59+05:30,{}
+P0b92f50c54,session_started,0,2025-11-29 13:41:59 IST,{}
+P0b92f50c54,eyes_closed_finished,30,2025-11-29 13:42:30 IST,{}
+P0b92f50c54,speech_baseline_timeout,132,2025-11-29 13:44:12 IST,{}

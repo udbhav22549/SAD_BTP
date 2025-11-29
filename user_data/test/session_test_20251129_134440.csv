@@ -1,0 +1,32 @@
+UserID,EventType,TimeElapsed,timestamp,VariableFields
+P0b92f50c54,START,0,2025-11-29T19:14:40+05:30,{}
+P0b92f50c54,session_started,0,2025-11-29 13:44:40 IST,{}
+P0b92f50c54,eyes_closed_finished,30,2025-11-29 13:45:10 IST,{}
+P0b92f50c54,paragraph_finished,51,2025-11-29 13:45:32 IST,{}
+P0b92f50c54,question_1_finished,53,2025-11-29 13:45:34 IST,{}
+P0b92f50c54,question_2_finished,54,2025-11-29 13:45:34 IST,{}
+P0b92f50c54,question_3_finished,55,2025-11-29 13:45:36 IST,{}
+P0b92f50c54,question_4_finished,56,2025-11-29 13:45:37 IST,{}
+P0b92f50c54,question_5_finished,57,2025-11-29 13:45:38 IST,{}
+P0b92f50c54,question_6_finished,58,2025-11-29 13:45:39 IST,{}
+P0b92f50c54,question_7_finished,58,2025-11-29 13:45:39 IST,{}
+P0b92f50c54,question_8_finished,59,2025-11-29 13:45:40 IST,{}
+P0b92f50c54,subjective_section_finished,59,2025-11-29 13:45:40 IST,{}
+P0b92f50c54,Qfirstseen,59,2025-11-29 13:45:40 IST,"{""Qn"": 0, ""FirsttimeSeen"": 59}"
+P0b92f50c54,QSubmit,60,2025-11-29 13:45:41 IST,"{""Qn"": 0, ""Soption"": ""B. Each internal node contains at most m children and at least m children"", ""FirsttimeSeen"": 59, ""ResponseTime"": 1}"
+P0b92f50c54,Qfirstseen,61,2025-11-29 13:45:42 IST,"{""Qn"": 3, ""FirsttimeSeen"": 61}"
+P0b92f50c54,QChange,61,2025-11-29 13:45:42 IST,"{""Qn"": 0, ""Qnto"": 3, ""submitted"": ""Yes""}"
+P0b92f50c54,QSubmit,62,2025-11-29 13:45:43 IST,"{""Qn"": 3, ""Soption"": ""A. k = 3"", ""FirsttimeSeen"": 61, ""ResponseTime"": 1}"
+P0b92f50c54,Qfirstseen,64,2025-11-29 13:45:45 IST,"{""Qn"": 1, ""FirsttimeSeen"": 64}"
+P0b92f50c54,QChange,64,2025-11-29 13:45:45 IST,"{""Qn"": 3, ""Qnto"": 1, ""submitted"": ""Yes""}"
+P0b92f50c54,QSubmit,65,2025-11-29 13:45:46 IST,"{""Qn"": 1, ""Soption"": ""B. All nodes in the cycle have equal indegree"", ""FirsttimeSeen"": 64, ""ResponseTime"": 1}"
+P0b92f50c54,Qfirstseen,66,2025-11-29 13:45:47 IST,"{""Qn"": 2, ""FirsttimeSeen"": 66}"
+P0b92f50c54,QChange,66,2025-11-29 13:45:47 IST,"{""Qn"": 1, ""Qnto"": 2, ""submitted"": ""Yes""}"
+P0b92f50c54,QSubmit,67,2025-11-29 13:45:48 IST,"{""Qn"": 2, ""Soption"": ""C. Removing any single edge in the cycle will make the entire graph acyclic"", ""FirsttimeSeen"": 66, ""ResponseTime"": 1}"
+P0b92f50c54,QChange,68,2025-11-29 13:45:49 IST,"{""Qn"": 2, ""Qnto"": 3, ""submitted"": ""Yes""}"
+P0b92f50c54,End,70,2025-11-29 13:45:50 IST,{}
+P0b92f50c54,Feedback,75,2025-11-29 13:45:56 IST,"{""confidence"": [3, 3, 3, 3], ""guess"": [false, false, false, false], ""guessType"": ["""", """", """", """"]}"
+P0b92f50c54,ImageDescription,78,2025-11-29 13:45:59 IST,"{""image_number"": 1, ""description"": ""abc""}"
+P0b92f50c54,ImageDescription,82,2025-11-29 13:46:03 IST,"{""image_number"": 2, ""description"": ""et""}"
+P0b92f50c54,SCORE,82,2025-11-29 13:46:03 IST,"{""score"": 2, ""answerStatus"": [""incorrect"", ""incorrect"", ""correct"", ""correct""]}"
+P0b92f50c54,FINISH,84,2025-11-29 13:46:04 IST,{}

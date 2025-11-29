@@ -1,0 +1,35 @@
+UserID,EventType,TimeElapsed,timestamp,VariableFields
+P0b92f50c54,START,0,2025-11-29T19:08:03+05:30,{}
+P0b92f50c54,session_started,0,2025-11-29 13:38:03 IST,{}
+P0b92f50c54,eyes_closed_finished,32,2025-11-29 13:38:35 IST,{}
+P0b92f50c54,paragraph_finished,46,2025-11-29 13:38:49 IST,{}
+P0b92f50c54,question_1_finished,48,2025-11-29 13:38:52 IST,{}
+P0b92f50c54,question_2_finished,49,2025-11-29 13:38:53 IST,{}
+P0b92f50c54,question_3_finished,50,2025-11-29 13:38:54 IST,{}
+P0b92f50c54,question_4_finished,51,2025-11-29 13:38:55 IST,{}
+P0b92f50c54,question_5_finished,54,2025-11-29 13:38:58 IST,{}
+P0b92f50c54,question_6_finished,54,2025-11-29 13:38:58 IST,{}
+P0b92f50c54,question_7_finished,55,2025-11-29 13:38:59 IST,{}
+P0b92f50c54,question_8_finished,56,2025-11-29 13:39:00 IST,{}
+P0b92f50c54,subjective_section_finished,56,2025-11-29 13:39:00 IST,{}
+P0b92f50c54,Qfirstseen,56,2025-11-29 13:39:00 IST,"{""Qn"": 0, ""FirsttimeSeen"": 56}"
+P0b92f50c54,Qfirstseen,61,2025-11-29 13:39:04 IST,"{""Qn"": 1, ""FirsttimeSeen"": 61}"
+P0b92f50c54,QChange,61,2025-11-29 13:39:04 IST,"{""Qn"": 0, ""Qnto"": 1, ""submitted"": ""No""}"
+P0b92f50c54,Qfirstseen,62,2025-11-29 13:39:06 IST,"{""Qn"": 2, ""FirsttimeSeen"": 62}"
+P0b92f50c54,QChange,62,2025-11-29 13:39:06 IST,"{""Qn"": 1, ""Qnto"": 2, ""submitted"": ""No""}"
+P0b92f50c54,QSubmit,64,2025-11-29 13:39:08 IST,"{""Qn"": 2, ""Soption"": ""B. Removing any single node from the cycle will break all cycles"", ""FirsttimeSeen"": 62, ""ResponseTime"": 2}"
+P0b92f50c54,Qfirstseen,66,2025-11-29 13:39:09 IST,"{""Qn"": 3, ""FirsttimeSeen"": 66}"
+P0b92f50c54,QChange,66,2025-11-29 13:39:09 IST,"{""Qn"": 2, ""Qnto"": 3, ""submitted"": ""Yes""}"
+P0b92f50c54,QSubmit,67,2025-11-29 13:39:10 IST,"{""Qn"": 3, ""Soption"": ""A. k = 3"", ""FirsttimeSeen"": 66, ""ResponseTime"": 1}"
+P0b92f50c54,QChange,69,2025-11-29 13:39:13 IST,"{""Qn"": 3, ""Qnto"": 0, ""submitted"": ""Yes""}"
+P0b92f50c54,QSubmit,70,2025-11-29 13:39:14 IST,"{""Qn"": 0, ""Soption"": ""B. Each internal node contains at most m children and at least m children"", ""FirsttimeSeen"": 56, ""ResponseTime"": 14}"
+P0b92f50c54,QChange,71,2025-11-29 13:39:15 IST,"{""Qn"": 0, ""Qnto"": 1, ""submitted"": ""Yes""}"
+P0b92f50c54,QSubmit,72,2025-11-29 13:39:16 IST,"{""Qn"": 1, ""Soption"": ""A. BFS tree will contain the cycle"", ""FirsttimeSeen"": 61, ""ResponseTime"": 11}"
+P0b92f50c54,QChange,73,2025-11-29 13:39:17 IST,"{""Qn"": 1, ""Qnto"": 2, ""submitted"": ""Yes""}"
+P0b92f50c54,QChange,75,2025-11-29 13:39:19 IST,"{""Qn"": 2, ""Qnto"": 3, ""submitted"": ""Yes""}"
+P0b92f50c54,End,77,2025-11-29 13:39:21 IST,{}
+P0b92f50c54,Feedback,85,2025-11-29 13:39:29 IST,"{""confidence"": [3, 3, 3, 3], ""guess"": [false, false, false, false], ""guessType"": ["""", """", """", """"]}"
+P0b92f50c54,ImageDescription,91,2025-11-29 13:39:35 IST,"{""image_number"": 1, ""description"": ""test""}"
+P0b92f50c54,ImageDescription,95,2025-11-29 13:39:39 IST,"{""image_number"": 2, ""description"": ""test""}"
+P0b92f50c54,SCORE,95,2025-11-29 13:39:39 IST,"{""score"": 1, ""answerStatus"": [""incorrect"", ""incorrect"", ""incorrect"", ""correct""]}"
+P0b92f50c54,FINISH,97,2025-11-29 13:39:41 IST,{}

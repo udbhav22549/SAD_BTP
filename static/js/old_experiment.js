@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // entire previous JS code here
+
     let currentScreen = "start";
     let currentQuestion = 0;
     let sessionEnded = false;
@@ -34,6 +34,37 @@ document.addEventListener("DOMContentLoaded", () => {
         guess: [],
         guessType: []
     };
+
+    let imageIndex = 0;
+    let imageDescriptions = [];
+    const imageList = ["/static/stage_5_img_0.jpg", "/static/stage_5_img_1.jpg"];
+
+    let cameraModulesLoaded = false;
+    let initFaceModel, setupCamera, startCameraRecording, stopCameraRecording;
+
+    async function loadCameraModules() {
+        if (cameraModulesLoaded) return;
+
+        const face = await import("/static/camera/face.js");
+        const recorder = await import("/static/camera/recorder.js");
+
+        initFaceModel = face.initFaceModel;
+        setupCamera = async function() {
+            const videoEl = document.getElementById("videoCam");
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            videoEl.srcObject = stream;
+
+            return new Promise(res => {
+                videoEl.onloadedmetadata = () => res();
+            });
+        };
+        startCameraRecording = recorder.startCameraRecording;
+        stopCameraRecording = recorder.stopCameraRecording;
+
+        cameraModulesLoaded = true;
+        console.log("Camera modules loaded.");
+    }
+
 
     // Fetch paragraph and questions from backend
 
@@ -113,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     currentScreen = "start";
     sessionStartTime = null;
     container.innerHTML = `
-        <button id="startBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-2xl">
+        <button id="startBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg text-2xl">
         Start Experiment
         </button>
     `;
@@ -130,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="w-full bg-gray-300 rounded-full h-6 mb-6">
         <div id="progressBar" class="bg-green-500 h-6 rounded-full w-0"></div>
         </div>
-        ${showNext ? '<button id="nextBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-lg">Next</button>' : ''}
+        ${showNext ? '<button id="nextBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg text-lg">Next</button>' : ''}
     `;
 
     const progressBar = document.getElementById('progressBar');
@@ -160,31 +191,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function startNewSession() {
-    console.log('Starting new session');
-    const resp = await fetch('/start_session', { method: 'POST' });
-    if (!resp.ok) {
-        if (resp.status === 401) window.location.href = '/login';
-        return;
-    }
+        console.log('Starting new session');
 
-    sessionStartTime = Date.now();
-    logEvent('session_started');
-    sessionActive = true;
-    sessionEnded = false;
-    toggleEndSession(true);
-    toggleExit(false);
-    startEyesClosed();
+        await loadCameraModules();
+        await initFaceModel();
+
+        // --- CHANGED SECTION ---
+        const videoElement = document.getElementById("videoCam"); // Get the HTML element
+        if (!videoElement) {
+            alert("Critical Error: Video element not found in HTML. Camera log will fail.");
+            return;
+        }
+
+        await setupCamera(); // This turns the webcam on
+        
+        // -----------------------
+        const resp = await fetch('/start_session', { method: 'POST' });
+        if (!resp.ok) {
+            if (resp.status === 401) window.location.href = '/login';
+            return;
+        }
+
+        startCameraRecording(videoElement); // Pass it to the recorder!
+        
+        sessionStartTime = Date.now();
+        logEvent('session_started');
+        sessionActive = true;
+        sessionEnded = false;
+        toggleEndSession(true);
+        toggleExit(false);
+        startEyesClosed();
     }
 
     function startEyesClosed() {
-    currentScreen = "eyes_closed";
-    startTimer(30, () => {
-        alertSound.play();
-        logEvent('eyes_closed_finished');
-        showParagraph();
-    }, "Close your eyes!");
-    toggleExit(false);
-    toggleEndSession(true);
+        currentScreen = "eyes_closed";
+        startTimer(30, () => {
+            alertSound.play();
+            logEvent('eyes_closed_finished');
+            showParagraph();
+        }, "Close your eyes!");
+        toggleExit(false);
+        toggleEndSession(true);
     }
 
     function showParagraph() {
@@ -195,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = `
         <h1 class="text-2xl font-semibold mb-6">Please read the following paragraph carefully:</h1>
         <p class="text-lg text-gray-700 mb-8">${paragraph}</p>
-        <button id="nextParagraphBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
+        <button id="nextParagraphBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
         Next
         </button>
     `;
@@ -203,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // When Next is clicked, move to questions
     document.getElementById('nextParagraphBtn').addEventListener('click', () => {
         logEvent('paragraph_finished');
-        alertSound.play();
+        // alertSound.play();
         showQuestion();
     });
     toggleExit(false);
@@ -256,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="mt-6">
         <button id="prevMcq" class="bg-gray-400 text-white font-bold py-2 px-4 rounded mr-2">Previous</button>
-        <button id="nextMcq" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Next</button>
+        <button id="nextMcq" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Next</button>
         <button id="submitMcqs" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2">Submit</button>
         </div>
     `;
@@ -297,7 +344,7 @@ function renderMcqNav() {
 
         // Highlight current question with thicker border
         if (i === currentMcqIndex) {
-            classes += " ring-2 ring-blue-500";
+            classes += " ring-2 ring-indigo-500";
         }
 
         navButtons += `
@@ -323,107 +370,113 @@ function renderMcqNav() {
     });
 }
 
-function renderMcqQuestion() {
-    const q = mcqQuestions[currentMcqIndex];
-    const savedAnswer = mcqAnswers[currentMcqIndex];
-    const mcqContainer = document.getElementById('mcqContainer');
-    if (!mcqContainer || !q) return;
+    function renderMcqQuestion() {
+        const q = mcqQuestions[currentMcqIndex];
+        const savedAnswer = mcqAnswers[currentMcqIndex];
+        const mcqContainer = document.getElementById('mcqContainer');
+        if (!mcqContainer || !q) return;
 
-    // Track first time seen
-    if (!firstSeenTime[currentMcqIndex]) {
-        firstSeenTime[currentMcqIndex] = getElapsedSeconds();
-    }
+        // Track first time seen
+        if (!firstSeenTime[currentMcqIndex]) {
+            firstSeenTime[currentMcqIndex] = getElapsedSeconds();
+        }
 
-    // Log first seen
-    if (!mcqVisited.has(currentMcqIndex)) {
-        mcqVisited.add(currentMcqIndex);
-        logEvent("Qfirstseen", {
-            Qn: currentMcqIndex,
-            FirsttimeSeen: firstSeenTime[currentMcqIndex]
-        });
-    }
-
-    // Log question change (when moving from one to another)
-    if (lastMcqIndex !== null && lastMcqIndex !== currentMcqIndex) {
-        logEvent("QChange", {
-            Qn: lastMcqIndex,
-            Qnto: currentMcqIndex,
-            submitted: mcqAnswers[lastMcqIndex] ? "Yes" : "No"
-        });
-    }
-    lastMcqIndex = currentMcqIndex;
-
-    // Render options
-    const optionsHtml = q.options.map(opt => `
-        <label class="block text-left border rounded-lg p-2 cursor-pointer hover:bg-gray-100">
-            <input type="radio" name="mcq" value="${opt}" ${savedAnswer === opt ? 'checked' : ''} class="mr-2">
-            ${opt}
-        </label>
-    `).join('');
-
-    mcqContainer.innerHTML = `
-        <h2 class="text-xl font-semibold mb-4">Q${currentMcqIndex + 1}. ${q.question}</h2>
-        ${optionsHtml}
-        <button id="markBtn" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded">
-            ${mcqMarked[currentMcqIndex] ? "Unmark" : "Mark for Review"}
-        </button>
-    `;
-
-    // Update nav + prev / next / submit buttons
-    renderMcqNav();
-
-    const prevBtn = document.getElementById('prevMcq');
-    if (prevBtn) {
-        prevBtn.style.display = currentMcqIndex > 0 ? 'inline-block' : 'none';
-    }
-
-    const submitBtn = document.getElementById('submitMcqs');
-    const nextBtn = document.getElementById('nextMcq');
-    if (currentMcqIndex === mcqQuestions.length - 1) {
-        if (nextBtn) nextBtn.classList.add('hidden');
-        if (submitBtn) submitBtn.classList.remove('hidden');
-    } else {
-        if (nextBtn) nextBtn.classList.remove('hidden');
-        if (submitBtn) submitBtn.classList.add('hidden');
-    }
-
-    // Handle answer selection
-    document.querySelectorAll('input[name="mcq"]').forEach(input => {
-        input.addEventListener('change', () => {
-            const selected = input.value;
-            const firstSeen = firstSeenTime[currentMcqIndex];
-            const responseTime = getElapsedSeconds() - firstSeen;
-
-            logEvent("QSubmit", {
+        // Log first seen
+        if (!mcqVisited.has(currentMcqIndex)) {
+            mcqVisited.add(currentMcqIndex);
+            logEvent("Qfirstseen", {
                 Qn: currentMcqIndex,
-                Soption: selected,
-                FirsttimeSeen: firstSeen,
-                ResponseTime: responseTime
+                FirsttimeSeen: firstSeenTime[currentMcqIndex]
             });
+        }
 
-            mcqAnswers[currentMcqIndex] = selected;
-            mcqPrevAnswer[currentMcqIndex] = selected;
-
-            renderMcqNav();
-        });
-    });
-
-    // Handle Mark / Unmark
-    const markBtn = document.getElementById("markBtn");
-    if (markBtn) {
-        markBtn.addEventListener("click", () => {
-            mcqMarked[currentMcqIndex] = !mcqMarked[currentMcqIndex];
-
-            logEvent(mcqMarked[currentMcqIndex] ? "QMark" : "QUnmark", {
-                Qn: currentMcqIndex,
-                Marked: mcqMarked[currentMcqIndex]
+        // Log question change (when moving from one to another)
+        if (lastMcqIndex !== null && lastMcqIndex !== currentMcqIndex) {
+            logEvent("QChange", {
+                Qn: lastMcqIndex,
+                Qnto: currentMcqIndex,
+                submitted: mcqAnswers[lastMcqIndex] ? "Yes" : "No"
             });
+        }
+        lastMcqIndex = currentMcqIndex;
 
-            // Re-render to update button text & nav color
-            renderMcqQuestion();
+        // Render options
+        const optionsHtml = q.options.map(opt => `
+            <label class="block text-left border rounded-lg p-2 mb-2 cursor-pointer hover:bg-gray-100">
+                <input type="radio" name="mcq" value="${opt}" ${savedAnswer === opt ? 'checked' : ''} class="mr-2">
+                ${opt}
+            </label>
+        `).join('');
+
+        mcqContainer.innerHTML = `
+            <h2 class="text-xl font-semibold mb-4">Q${currentMcqIndex + 1}.</h2>
+            <div class="text-left mb-4 markdown-content">${marked.parse(q.question)}</div>
+            ${optionsHtml}
+            <button id="markBtn" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded">
+                ${mcqMarked[currentMcqIndex] ? "Unmark" : "Mark for Review"}
+            </button>
+        `;
+
+        // Update nav + prev / next / submit buttons
+        renderMcqNav();
+
+        const prevBtn = document.getElementById('prevMcq');
+        if (prevBtn) {
+            prevBtn.style.display = currentMcqIndex > 0 ? 'inline-block' : 'none';
+        }
+
+        const submitBtn = document.getElementById('submitMcqs');
+        const nextBtn = document.getElementById('nextMcq');
+        if (currentMcqIndex === mcqQuestions.length - 1) {
+            if (nextBtn) nextBtn.classList.add('hidden');
+            if (submitBtn) submitBtn.classList.remove('hidden');
+        } else {
+            if (nextBtn) nextBtn.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.add('hidden');
+        }
+
+        // Handle answer selection
+        document.querySelectorAll('input[name="mcq"]').forEach(input => {
+            input.addEventListener('change', () => {
+                const selected = input.value;
+                const firstSeen = firstSeenTime[currentMcqIndex];
+                const responseTime = getElapsedSeconds() - firstSeen;
+
+                logEvent("QSubmit", {
+                    Qn: currentMcqIndex,
+                    Soption: selected,
+                    FirsttimeSeen: firstSeen,
+                    ResponseTime: responseTime
+                });
+
+                mcqAnswers[currentMcqIndex] = selected;
+                mcqPrevAnswer[currentMcqIndex] = selected;
+
+                renderMcqNav();
+            });
         });
+
+        // Handle Mark / Unmark
+        const markBtn = document.getElementById("markBtn");
+        if (markBtn) {
+            markBtn.addEventListener("click", () => {
+                mcqMarked[currentMcqIndex] = !mcqMarked[currentMcqIndex];
+
+                logEvent(mcqMarked[currentMcqIndex] ? "QMark" : "QUnmark", {
+                    Qn: currentMcqIndex,
+                    Marked: mcqMarked[currentMcqIndex]
+                });
+
+                // Re-render to update button text & nav color
+                renderMcqQuestion();
+            });
+        }
+
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+
     }
-}
 
     container.addEventListener('click', (e) => {
     if (e.target.id === 'nextMcq') {
@@ -455,31 +508,42 @@ function renderMcqQuestion() {
 
         logEvent("End", {});
         //logEvent('mcq_section_finished');
-        showScoreCard();
+        showFeedbackForm();
     }
     });
 
     function showScoreCard() {
         toggleExit(true);
         toggleEndSession(false);
+
         let score = 0;
         mcqQuestions.forEach((q, i) => {
             if (mcqAnswers[i] === q.answer) score++;
         });
+
         let answerStatus = mcqQuestions.map((q, i) =>
             mcqAnswers[i] === q.answer ? "correct" : "incorrect"
         );
 
+        // Log final score
         logEvent("SCORE", {
             score: score,
             answerStatus: answerStatus
         });
 
+        // Show Score UI (NO feedback button)
         container.innerHTML = `
             <h1 class="text-4xl font-bold text-green-600 mb-4">Scorecard</h1>
-            <p class="text-lg mb-6">You answered <b>${score}</b> out of <b>${mcqQuestions.length}</b> correctly.</p>
-            <button id="feedbackBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
-            Give Feedback
+
+            <p class="text-lg mb-6">
+                You answered 
+                <b>${score}</b> out of <b>${mcqQuestions.length}</b> correctly.
+            </p>
+
+            <button id="finishBtn"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white 
+                    font-bold py-3 px-6 rounded-lg text-xl">
+                Finish →
             </button>
         `;
     }
@@ -489,68 +553,215 @@ function renderMcqQuestion() {
         toggleExit(false);
         toggleEndSession(true);
 
-
-        if (!feedbackQuestions.length) {
-            container.innerHTML = `<p class="text-red-600 font-bold">No feedback questions found.</p>`;
+        if (!mcqQuestions.length) {
+            container.innerHTML = `<p class="text-red-600 font-bold">No MCQ questions found.</p>`;
             return;
         }
 
-        let formHtml = feedbackQuestions.map((q, i) => {
-            if (q.options[0] === "TEXT") {
-            return `
-                <label class="block mb-4">
-                <span class="font-semibold">${i + 1}. ${q.question}</span><br>
-                <textarea name="q${i + 1}" rows="3" class="border rounded w-full p-2" placeholder="Your answer..."></textarea>
-                </label>
-            `;
-            } else {
-            const opts = q.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-            return `
-                <label class="block mb-4">
-                <span class="font-semibold">${i + 1}. ${q.question}</span><br>
-                <select name="q${i + 1}" class="border rounded w-full p-2">
-                    <option value="">Select</option>
-                    ${opts}
-                </select>
-                </label>
-            `;
-            }
-        }).join('');
+        renderFeedbackQuestion();
+    }
+
+    function renderFeedbackQuestion() {
+        const q = mcqQuestions[feedbackIndex];
+        const userAnswer = mcqAnswers[feedbackIndex];
+
+        let optionsHTML = q.options.map(opt => `
+            <label class="block border rounded p-2 mb-2 ${opt === userAnswer ? 'bg-yellow-100 border-yellow-400' : ''}">
+                <input type="radio" disabled ${opt === userAnswer ? "checked" : ""}>
+                ${opt}
+            </label>
+        `).join("");
 
         container.innerHTML = `
-            <h1 class="text-3xl font-bold mb-4">Feedback</h1>
-            <form id="feedbackForm" class="space-y-4 text-left">
-            ${formHtml}
-            <div class="mt-6 text-center">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
-                Submit Feedback
-                </button>
+            <h1 class="text-3xl font-bold mb-4">Feedback (${feedbackIndex + 1}/${mcqQuestions.length})</h1>
+            <h2 class="text-xl font-semibold mb-4">${q.question}</h2>
+
+            <div class="mb-6">
+                <h3 class="font-semibold mb-2">Your Answer:</h3>
+                ${optionsHTML}
             </div>
-            </form>
+
+            <div class="mb-6">
+                <label class="font-semibold block mb-2">Confidence (1 = low, 3 = neutral, 5 = high)</label>
+                <input id="confidenceSlider" type="range" min="0" max="5" value="0" class="w-full">
+                <p id="confValue" class="mt-1 text-gray-700">0</p>
+            </div>
+
+            <div class="mb-6">
+                <label class="font-semibold block mb-2">Did you guess your answer?</label>
+                <select id="guessSelect" class="border p-2 rounded w-full">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </div>
+
+            <div class="mb-6">
+                <label class="font-semibold block mb-2">If guessed, choose type</label>
+                <select id="guessTypeSelect" class="border p-2 rounded w-full">
+                    <option value="">(Not Applicable)</option>
+                    <option value="random">Random</option>
+                    <option value="strategic">Strategic</option>
+                    <option value="intellectual">Intellectual</option>
+                </select>
+            </div>
+
+            <div class="mt-8 text-center">
+                ${
+                    feedbackIndex === mcqQuestions.length - 1
+                    ? `<button id="submitFeedback" class="bg-green-600 text-white px-6 py-3 rounded-lg text-xl">Submit Feedback</button>`
+                    : `<button id="nextFeedback" class="bg-indigo-600 text-white px-6 py-3 rounded-lg text-xl">Next</button>`
+                }
+            </div>
+        `;
+
+        // update slider display
+        document.getElementById("confidenceSlider").addEventListener("input", (e) => {
+            document.getElementById("confValue").textContent = e.target.value;
+        });
+
+        // handle next/submit button clicks
+        if (document.getElementById("nextFeedback")) {
+            document.getElementById("nextFeedback").addEventListener("click", saveFeedbackAndNext);
+        }
+
+        if (document.getElementById("submitFeedback")) {
+            document.getElementById("submitFeedback").addEventListener("click", submitFinalFeedback);
+        }
+    }
+
+    function saveFeedbackAndNext() {
+        const conf = parseInt(document.getElementById("confidenceSlider").value);
+        const guessed = document.getElementById("guessSelect").value === "true";
+        let type = document.getElementById("guessTypeSelect").value;
+
+        if (!guessed) type = "";  // if no guess → blank as required
+
+        feedbackData.confidence.push(conf);
+        feedbackData.guess.push(guessed);
+        feedbackData.guessType.push(type);
+
+        feedbackIndex++;
+        renderFeedbackQuestion();
+    }
+
+    function submitFinalFeedback() {
+        const conf = parseInt(document.getElementById("confidenceSlider").value);
+        const guessed = document.getElementById("guessSelect").value === "true";
+        let type = document.getElementById("guessTypeSelect").value;
+
+        if (!guessed) type = "";
+
+        feedbackData.confidence.push(conf);
+        feedbackData.guess.push(guessed);
+        feedbackData.guessType.push(type);
+
+        // final log event
+        logEvent("Feedback", feedbackData);
+
+        console.log("Final Feedback:", feedbackData);
+
+        // Show score AFTER feedback
+        showImageDescriptionTask();
+    }
+
+    function showImageDescriptionTask() {
+        currentScreen = "image_description";
+        toggleExit(false);
+        toggleEndSession(true);
+
+        renderImageDescription();
+    }
+
+    function renderImageDescription() {
+        const imgSrc = imageList[imageIndex];
+
+        container.innerHTML = `
+            <h1 class="text-3xl font-bold mb-6">Image Description (${imageIndex + 1}/2)</h1>
+            <p class="text-lg mb-4">Please describe what you see in the image below:</p>
+
+            <img src="${imgSrc}" 
+                class="w-full max-w-md mx-auto rounded shadow mb-6" />
+
+            <textarea id="imageDescInput" 
+                    class="w-full border rounded p-3 text-lg"
+                    rows="5"
+                    placeholder="Type your description here..."></textarea>
+
+            <button id="imageNextBtn"
+                    class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg text-xl">
+                ${imageIndex === imageList.length - 1 ? "Submit" : "Next"}
+            </button>
         `;
     }
 
-
+    
     function showCompletionScreen() {
-    window.location.href = "/thankyou";
+        window.location.href = "/thankyou";
     }
 
     container.addEventListener('click', (e) => {
-    const id = e.target && e.target.id;
-    if (id === 'startBtn') {
-        e.preventDefault();
-        startNewSession();
-    }
-    if (id === 'newExpBtn') {
-        e.preventDefault();
-        // renderStartScreen();
-    }
-    if (id === 'feedbackBtn') {
-        e.preventDefault();
-        showFeedbackForm();
-    }
+        const id = e.target && e.target.id;
+
+        if (id === 'startBtn') {
+            e.preventDefault();
+            startNewSession();
+        }
+        if (id === 'newExpBtn') {
+            e.preventDefault();
+            // renderStartScreen();
+        }
+        if (id === 'feedbackBtn') {
+            e.preventDefault();
+            showFeedbackForm();
+        }
+        if (e.target.id === "imageNextBtn") {
+            const text = document.getElementById("imageDescInput").value.trim();
+
+            if (!text) {
+                alert("Please write your description before proceeding.");
+                return;
+            }
+
+            // Save text in array
+            imageDescriptions.push(text);
+
+            // Log event for this image
+            logEvent("ImageDescription", {
+                image_number: imageIndex + 1,
+                description: text
+            });
+
+            // If more images remain → go to next image
+            if (imageIndex < imageList.length - 1) {
+                imageIndex++;
+                renderImageDescription();
+                return;
+            }
+
+            // If this was the LAST image:
+            // Stop camera and send camera log
+            const cameraData = stopCameraRecording();
+
+            fetch("/save_camera_log", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ log: cameraData })
+            }).catch(err => console.error("Camera log save failed:", err));
+
+            // Show scorecard after final image
+            showScoreCard();
+        }
 
     });
+
+    container.addEventListener('click', (e) => {
+        if (e.target.id === 'finishBtn') {
+            stopCameraRecording();
+            logEvent("FINISH", {});
+            window.location.href = "/thankyou";
+        }
+    });
+
 
     document.addEventListener('submit', (e) => {
     if (e.target.id === 'feedbackForm') {
@@ -565,31 +776,33 @@ function renderMcqQuestion() {
         console.log("Feedback received:", feedback);
 
         // Move to final screen
-        showCompletionScreen();
+        showImageDescriptionTask();
     }
     });
 
 
     endBtn.addEventListener('click', () => {
-    logEvent('session_ended', {});
-    window.location.href = "/thankyou";
+        stopCameraRecording();
+        logEvent('session_ended', {});
+        window.location.href = "/thankyou";
 
-    //  if (!sessionActive) return;
-    //  sessionEnded = true;
-    //  sessionActive = false;
-    //  clearInterval(window.currentInterval);
-    //  logEvent('session_ended');
-    //  toggleLogout(true);
-    //  toggleEndSession(false);
-    //  container.innerHTML = `
-    //    <h1 class="text-4xl font-bold text-red-600">Session Ended</h1>
-    //    <p class="mt-4 text-lg text-gray-700">Thank you for participating!</p>
-    //    <button id="newExpBtn" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">Start New Experiment</button>
-    //  `;
+        //  if (!sessionActive) return;
+        //  sessionEnded = true;
+        //  sessionActive = false;
+        //  clearInterval(window.currentInterval);
+        //  logEvent('session_ended');
+        //  toggleLogout(true);
+        //  toggleEndSession(false);
+        //  container.innerHTML = `
+        //    <h1 class="text-4xl font-bold text-red-600">Session Ended</h1>
+        //    <p class="mt-4 text-lg text-gray-700">Thank you for participating!</p>
+        //    <button id="newExpBtn" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">Start New Experiment</button>
+        //  `;
     });
    
     // EXIT button → go to thank you page
     exitBtn.addEventListener("click", () => {
+        stopCameraRecording();
         clearInterval(window.currentInterval);
         logEvent("EXIT", {});
         window.location.href = "/thankyou";

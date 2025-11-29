@@ -1,0 +1,30 @@
+[
+    {
+        "UserID": "P0b92f50c54",
+        "EventType": "START",
+        "TimeElapsed": 0,
+        "timestamp": "2025-11-29T19:11:59+05:30",
+        "VariableFields": {}
+    },
+    {
+        "UserID": "P0b92f50c54",
+        "EventType": "session_started",
+        "TimeElapsed": 0,
+        "timestamp": "2025-11-29 13:41:59 IST",
+        "VariableFields": {}
+    },
+    {
+        "UserID": "P0b92f50c54",
+        "EventType": "eyes_closed_finished",
+        "TimeElapsed": 30,
+        "timestamp": "2025-11-29 13:42:30 IST",
+        "VariableFields": {}
+    },
+    {
+        "UserID": "P0b92f50c54",
+        "EventType": "speech_baseline_timeout",
+        "TimeElapsed": 132,
+        "timestamp": "2025-11-29 13:44:12 IST",
+        "VariableFields": {}
+    }
+]
