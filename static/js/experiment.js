@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById('nextParagraphBtn').addEventListener('click', () => {
             logEvent('paragraph_finished');
-            alertSound.play();
+            // alertSound.play();
             showQuestion();
         });
         toggleExit(false);
@@ -608,7 +608,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderFeedbackQuestion();
     }
 
-    function renderFeedbackQuestion() {
+function renderFeedbackQuestion() {
         const q = mcqQuestions[feedbackIndex];
         const userAnswer = mcqAnswers[feedbackIndex];
 
@@ -630,8 +630,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <div class="mb-6">
                 <label class="font-semibold block mb-2">Confidence (1 = low, 3 = neutral, 5 = high)</label>
-                <input id="confidenceSlider" type="range" min="1" max="5" value="3" class="w-full">
-                <p id="confValue" class="mt-1 text-gray-700">3</p>
+                <input id="confidenceSlider" type="range" min="0" max="5" value="0" class="w-full">
+                <p id="confValue" class="mt-1 text-gray-700">0</p>
             </div>
 
             <div class="mb-6">
@@ -644,7 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <div class="mb-6">
                 <label class="font-semibold block mb-2">If guessed, choose type</label>
-                <select id="guessTypeSelect" class="border p-2 rounded w-full">
+                <select id="guessTypeSelect" class="border p-2 rounded w-full" disabled>
                     <option value="">(Not Applicable)</option>
                     <option value="random">Random</option>
                     <option value="strategic">Strategic</option>
@@ -665,6 +665,20 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("confValue").textContent = e.target.value;
         });
 
+        // --- NEW LOGIC: Enable/Disable dropdown based on Guess selection ---
+        const guessSelect = document.getElementById("guessSelect");
+        const typeSelect = document.getElementById("guessTypeSelect");
+
+        guessSelect.addEventListener("change", function() {
+            if (this.value === "true") {
+                typeSelect.disabled = false; // Enable if Yes
+            } else {
+                typeSelect.disabled = true;  // Disable if No
+                typeSelect.value = "";       // Reset value
+            }
+        });
+        // ------------------------------------------------------------------
+
         if (document.getElementById("nextFeedback")) {
             document.getElementById("nextFeedback").addEventListener("click", saveFeedbackAndNext);
         }
@@ -678,6 +692,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const conf = parseInt(document.getElementById("confidenceSlider").value);
         const guessed = document.getElementById("guessSelect").value === "true";
         let type = document.getElementById("guessTypeSelect").value;
+
+        // --- VALIDATION: Stop if guessed is Yes but type is empty ---
+        if (guessed && (type === "" || type === null)) {
+            alert("Please select a Guess Type.");
+            return; // Stop function execution here
+        }
+        // ------------------------------------------------------------
 
         if (!guessed) type = "";
 
@@ -693,6 +714,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const conf = parseInt(document.getElementById("confidenceSlider").value);
         const guessed = document.getElementById("guessSelect").value === "true";
         let type = document.getElementById("guessTypeSelect").value;
+
+        // --- VALIDATION: Stop if guessed is Yes but type is empty ---
+        if (guessed && (type === "" || type === null)) {
+            alert("Since you selected 'Yes' for guessing, please select a Guess Type.");
+            return; // Stop function execution here
+        }
+        // ------------------------------------------------------------
 
         if (!guessed) type = "";
 
