@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startEyesClosed() {
         currentScreen = "eyes_closed";
-        startTimer(30, () => {
+        startTimer(180, () => {
             alertSound.play();
             logEvent('eyes_closed_finished');
             showParagraph();
@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         container.innerHTML = `
-            <h1 class="text-2xl font-semibold mb-6">Please read the following paragraph carefully:</h1>
+            <h1 class="text-2xl font-semibold mb-6">Please read aloud the following paragraph carefully:</h1>
             <p class="text-lg text-gray-700 mb-8">${paragraph}</p>
             <button id="nextParagraphBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
             Next
