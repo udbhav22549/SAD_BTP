@@ -314,12 +314,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (currentQuestion === 0) {
             startGlobalTimer(8 * 60, "Stage-2", () => {
                 logEvent("stage2_timeout");
-                currentQuestion = 4; // Jump to next set
+                currentQuestion = 6; // Jump to next set
                 showQuestion();
             });
         } 
         // Q5 (Index 4): Start 10 Minute Timer for next 4 questions
-        else if (currentQuestion === 4) {
+        else if (currentQuestion === 6) {
             startGlobalTimer(10 * 60, "Stage-3", () => {
                 logEvent("stage3_timeout");
                 showMcqSection(); // Jump to MCQ
