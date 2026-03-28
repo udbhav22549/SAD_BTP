@@ -249,36 +249,75 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function startNewSession() {
-        console.log('Starting new session');
+        console.log('Requesting permissions...');
+        const startBtn = document.getElementById("startBtn");
+        if (startBtn) {
+            startBtn.textContent = "Loading Permissions...";
+            startBtn.disabled = true;
+        }
 
-        await loadCameraModules();
-        await initFaceModel();
-        
-        // Fix: get video element before setup
-        const videoElement = document.getElementById("videoCam");
-        if (!videoElement) return alert("Video element missing");
+        try {
+            await loadCameraModules();
+            await initFaceModel();
+            
+            const videoElement = document.getElementById("videoCam");
+            if (!videoElement) return alert("Video element missing");
 
-        await setupCamera();
-        
+            await setupCamera();
+            
+            // Wait for user to select Screen Share
+            await startScreenRecording(videoElement);
+
+            // --- STEP 2: Permissions Granted! Show Fullscreen Button ---
+            container.innerHTML = `
+                <div class="text-center mt-10">
+                    <h1 class="text-4xl font-bold mb-6 text-green-600">Permissions Granted!</h1>
+                    <p class="text-xl mb-8">Click the button below to enter Fullscreen mode and begin the test.</p>
+                    <button id="enterFullscreenBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg text-2xl shadow-lg">
+                        Enter Fullscreen & Begin
+                    </button>
+                </div>
+            `;
+
+            document.getElementById("enterFullscreenBtn").addEventListener("click", async () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        await document.documentElement.requestFullscreen();
+                    }
+                } catch (e) {
+                    console.warn("Fullscreen failed", e);
+                }
+                // Finally start the timers and recording
+                startExperimentFlow(videoElement);
+            });
+
+        } catch (err) {
+            console.error("Setup aborted:", err);
+            if (startBtn) {
+                startBtn.textContent = "Start Experiment";
+                startBtn.disabled = false;
+            }
+
+            // Catch the "Cheat" error and warn them
+            if (err.message === "NOT_MONITOR") {
+                alert("Action Required: You MUST select the 'Entire Screen' tab. Sharing a window or browser tab is not allowed.");
+            } else {
+                alert("Could not start recording. Please ensure camera and screen share permissions are granted.");
+            }
+        }
+    }
+
+    // This handles the actual start of the timers and backend logging
+    async function startExperimentFlow(videoElement) {
         const resp = await fetch('/start_session', { method: 'POST' });
         if (!resp.ok) {
             if (resp.status === 401) window.location.href = '/login';
             return;
         }
 
-        // Fix: pass element to recorder
         startCameraRecording(videoElement);
-
-        // --- ADDED: CHANGE 3 & 4 ---
-        // Start screen + webcam composite recording (hidden from user)
-        await startScreenRecording(videoElement);
-
-        // Initialise distraction detector
         initDistractionDetector(null, logEvent);
-
-        // Wire the detector into the global so face.js can call it:
         window._detectDistraction = detectDistraction;
-        // ---------------------------
 
         sessionStartTime = Date.now();
         logEvent('session_started');
@@ -295,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startEyesClosed() {
         currentScreen = "eyes_closed";
-        startTimer(10, () => {
+        startTimer(180, () => {
             alertSound.play();
             logEvent('eyes_closed_finished');
             showParagraph();
