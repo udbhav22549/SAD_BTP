@@ -87,30 +87,28 @@ def end_camera_log():
 
 @camera_bp.route("/save_screen_recording", methods=["POST"])
 def save_screen_recording():
-    """
-    Receives a WebM video blob (multipart/form-data, field name: 'recording')
-    and saves it to the participant's folder as:
-        <base_filename>_screen_recording.webm
-    """
     folder = get_participant_folder()
     base_filename = session.get("current_base_filename")
 
+    # Safety check: ensure session is active
     if not folder or not base_filename:
         return {"status": "error", "msg": "No active session"}, 400
 
     if "recording" not in request.files:
         return {"status": "error", "msg": "No file in request"}, 400
 
-    recording_file = request.files["recording"]
-
+    file = request.files["recording"]
+    
+    # Safety check: Ensure the folder actually exists before writing!
     os.makedirs(folder, exist_ok=True)
+    
     save_path = os.path.join(folder, f"{base_filename}_screen_recording.webm")
 
+    # Open in 'ab' (append binary) mode
     try:
-        recording_file.save(save_path)
-        size_kb = os.path.getsize(save_path) // 1024
-        print(f"[ScreenRecorder] Saved: {save_path} ({size_kb} KB)")
-        return {"status": "saved", "path": save_path, "size_kb": size_kb}
+        with open(save_path, "ab") as f:
+            f.write(file.read())
+        return {"status": "chunk_saved"}
     except Exception as e:
-        print(f"[ScreenRecorder] Save error: {e}")
+        print(f"Error saving video chunk: {e}")
         return {"status": "error", "msg": str(e)}, 500

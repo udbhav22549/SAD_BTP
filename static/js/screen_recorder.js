@@ -56,19 +56,24 @@ window._updateEyeRegion = function(landmarks, vWidth, vHeight) {
 
 export async function startScreenRecording(webcamVideoEl) {
   try {
-    // 1. Request screen capture (Hint to browser to default to Entire Screen)
+    // 1. Request screen capture with STRICT hints
     _screenStream = await navigator.mediaDevices.getDisplayMedia({
-      video: { cursor: "always", displaySurface: "monitor" },
-      audio: false
+      video: { 
+          cursor: "always", 
+          displaySurface: "monitor" 
+      },
+      audio: false,
+      surfaceSwitching: "exclude" // NEW: Prevents Chrome from showing the "Share this tab instead" button
     });
 
-    // 2. VALIDATE: Did they actually pick "Entire Screen"?
+    // 2. ULTRA-STRICT VALIDATION: Did they actually pick "Entire Screen"?
     const videoTrack = _screenStream.getVideoTracks()[0];
     const settings = videoTrack.getSettings();
 
-    if (settings.displaySurface && settings.displaySurface !== "monitor") {
+    // Remove the loophole. If it is NOT exactly "monitor", reject it.
+    if (settings.displaySurface !== "monitor") {
         videoTrack.stop(); // Kill the stream immediately
-        throw new Error("NOT_MONITOR"); // Trigger the catch block
+        throw new Error("NOT_MONITOR"); // Trigger the catch block in experiment.js
     }
 
     // 3. Create hidden video element
@@ -99,11 +104,15 @@ export async function startScreenRecording(webcamVideoEl) {
 
     _mediaRecorder = new MediaRecorder(canvasStream, { mimeType });
 
-    _mediaRecorder.ondataavailable = (e) => {
-      if (e.data && e.data.size > 0) _recordedChunks.push(e.data);
+    _mediaRecorder.ondataavailable = async (e) => {
+        if (e.data && e.data.size > 0) {
+            // Upload this specific 30-second chunk immediately
+            await _uploadRecording(e.data);
+        }
     };
 
-    _mediaRecorder.start(1000);
+    // Start recording and trigger 'ondataavailable' every 30 seconds
+    _mediaRecorder.start(30000);
     console.log("[ScreenRecorder] Eye-Crop Recording started.");
 
   } catch (err) {
@@ -116,16 +125,21 @@ export async function stopScreenRecording() {
   if (!_mediaRecorder || _mediaRecorder.state === "inactive") return;
 
   return new Promise((resolve) => {
-    _mediaRecorder.onstop = async () => {
+    _mediaRecorder.onstop = () => {
+      // Stop animation loop
       if (_animFrameId) cancelAnimationFrame(_animFrameId);
+      
+      // Stop screen stream tracks
       if (_screenStream) _screenStream.getTracks().forEach(t => t.stop());
+      
+      // Clean up DOM
       if (_screenVideo) _screenVideo.remove();
       if (_compositeCanvas) _compositeCanvas.remove();
 
-      if (_recordedChunks.length > 0) {
-        const blob = new Blob(_recordedChunks, { type: "video/webm" });
-        await _uploadRecording(blob);
-      }
+      // Note: We do NOT need to manually upload here.
+      // Calling _mediaRecorder.stop() automatically triggers 
+      // ondataavailable one last time, which handles the final upload!
+      
       resolve();
     };
 
