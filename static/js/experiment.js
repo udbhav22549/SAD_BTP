@@ -46,6 +46,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let cameraModulesLoaded = false;
     let initFaceModel, setupCamera, startCameraRecording, stopCameraRecording;
+    
+    // --- ADDED: CHANGE 1 ---
+    let startScreenRecording, stopScreenRecording;
+    let initDistractionDetector, detectDistraction, stopDistractionDetector;
+    // -----------------------
 
     // ==========================================
     //  NEW: GLOBAL TIMER FUNCTIONS
@@ -112,6 +117,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         cameraModulesLoaded = true;
         console.log("Camera modules loaded.");
+
+        // --- ADDED: CHANGE 2 ---
+        // Load screen recorder
+        const screenRec = await import("/static/js/screen_recorder.js");
+        startScreenRecording = screenRec.startScreenRecording;
+        stopScreenRecording  = screenRec.stopScreenRecording;
+
+        // Load distraction detector
+        const distractMod = await import("/static/js/distraction_detector.js");
+        initDistractionDetector  = distractMod.initDistractionDetector;
+        detectDistraction        = distractMod.detectDistraction;
+        stopDistractionDetector  = distractMod.stopDistractionDetector;
+        // -----------------------
     }
 
     async function loadExperimentData() {
@@ -184,11 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
         currentQuestion = 0;
         currentScreen = "start";
         sessionStartTime = null;
-        // container.innerHTML = `
-        //     <button id="startBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg text-2xl">
-        //     Start Experiment
-        //     </button>
-        // `;
         
         // --- FIX: Attach listener so button works ---
         document.getElementById("startBtn").addEventListener("click", startNewSession);
@@ -256,6 +269,17 @@ document.addEventListener("DOMContentLoaded", () => {
         // Fix: pass element to recorder
         startCameraRecording(videoElement);
 
+        // --- ADDED: CHANGE 3 & 4 ---
+        // Start screen + webcam composite recording (hidden from user)
+        await startScreenRecording(videoElement);
+
+        // Initialise distraction detector
+        initDistractionDetector(null, logEvent);
+
+        // Wire the detector into the global so face.js can call it:
+        window._detectDistraction = detectDistraction;
+        // ---------------------------
+
         sessionStartTime = Date.now();
         logEvent('session_started');
         sessionActive = true;
@@ -271,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startEyesClosed() {
         currentScreen = "eyes_closed";
-        startTimer(180, () => {
+        startTimer(10, () => {
             alertSound.play();
             logEvent('eyes_closed_finished');
             showParagraph();
@@ -608,7 +632,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderFeedbackQuestion();
     }
 
-function renderFeedbackQuestion() {
+    function renderFeedbackQuestion() {
         const q = mcqQuestions[feedbackIndex];
         const userAnswer = mcqAnswers[feedbackIndex];
 
@@ -665,19 +689,17 @@ function renderFeedbackQuestion() {
             document.getElementById("confValue").textContent = e.target.value;
         });
 
-        // --- NEW LOGIC: Enable/Disable dropdown based on Guess selection ---
         const guessSelect = document.getElementById("guessSelect");
         const typeSelect = document.getElementById("guessTypeSelect");
 
         guessSelect.addEventListener("change", function() {
             if (this.value === "true") {
-                typeSelect.disabled = false; // Enable if Yes
+                typeSelect.disabled = false;
             } else {
-                typeSelect.disabled = true;  // Disable if No
-                typeSelect.value = "";       // Reset value
+                typeSelect.disabled = true;
+                typeSelect.value = "";
             }
         });
-        // ------------------------------------------------------------------
 
         if (document.getElementById("nextFeedback")) {
             document.getElementById("nextFeedback").addEventListener("click", saveFeedbackAndNext);
@@ -693,12 +715,10 @@ function renderFeedbackQuestion() {
         const guessed = document.getElementById("guessSelect").value === "true";
         let type = document.getElementById("guessTypeSelect").value;
 
-        // --- VALIDATION: Stop if guessed is Yes but type is empty ---
         if (guessed && (type === "" || type === null)) {
             alert("Please select a Guess Type.");
-            return; // Stop function execution here
+            return; 
         }
-        // ------------------------------------------------------------
 
         if (!guessed) type = "";
 
@@ -715,12 +735,10 @@ function renderFeedbackQuestion() {
         const guessed = document.getElementById("guessSelect").value === "true";
         let type = document.getElementById("guessTypeSelect").value;
 
-        // --- VALIDATION: Stop if guessed is Yes but type is empty ---
         if (guessed && (type === "" || type === null)) {
             alert("Since you selected 'Yes' for guessing, please select a Guess Type.");
-            return; // Stop function execution here
+            return; 
         }
-        // ------------------------------------------------------------
 
         if (!guessed) type = "";
 
@@ -740,9 +758,15 @@ function renderFeedbackQuestion() {
         toggleEndSession(true);
 
         // --- TIMER: 10 Minutes ---
-        startGlobalTimer(10 * 60, "Stage-5", () => {
+        // Notice we made this callback async for the new cleanup calls
+        startGlobalTimer(10 * 60, "Stage-5", async () => {
             logEvent("image_task_timeout");
-            // End of experiment when time runs out
+            
+            // --- ADDED: CHANGE 5 ---
+            if (stopScreenRecording)   await stopScreenRecording();
+            if (stopDistractionDetector) stopDistractionDetector();
+            // -----------------------
+
             const cameraData = stopCameraRecording();
             fetch("/save_camera_log", {
                 method: "POST",
@@ -781,9 +805,8 @@ function renderFeedbackQuestion() {
         window.location.href = "/thankyou";
     }
 
-    container.addEventListener('click', (e) => {
-        // Start button logic moved to renderStartScreen for cleaner init
-        
+    // Notice we made this click callback async
+    container.addEventListener('click', async (e) => {
         if (e.target.id === 'newExpBtn') {
             e.preventDefault();
         }
@@ -813,6 +836,11 @@ function renderFeedbackQuestion() {
             }
 
             // Stop and Save
+            // --- ADDED: CHANGE 5 ---
+            if (stopScreenRecording)   await stopScreenRecording();
+            if (stopDistractionDetector) stopDistractionDetector();
+            // -----------------------
+
             const cameraData = stopCameraRecording();
             clearGlobalTimer(); // Stop timer
 
@@ -826,22 +854,40 @@ function renderFeedbackQuestion() {
         }
     });
 
-    container.addEventListener('click', (e) => {
+    // Notice we made this click callback async
+    container.addEventListener('click', async (e) => {
         if (e.target.id === 'finishBtn') {
+            // --- ADDED: CHANGE 5 ---
+            if (stopScreenRecording)   await stopScreenRecording();
+            if (stopDistractionDetector) stopDistractionDetector();
+            // -----------------------
+
             stopCameraRecording();
             logEvent("FINISH", {});
             window.location.href = "/thankyou";
         }
     });
 
-    endBtn.addEventListener('click', () => {
+    // Notice we made this callback async
+    endBtn.addEventListener('click', async () => {
+        // --- ADDED: CHANGE 5 ---
+        if (stopScreenRecording)   await stopScreenRecording();
+        if (stopDistractionDetector) stopDistractionDetector();
+        // -----------------------
+
         stopCameraRecording();
         clearGlobalTimer();
         logEvent('session_ended', {});
         window.location.href = "/thankyou";
     });
     
-    exitBtn.addEventListener('click', () => {
+    // Notice we made this callback async
+    exitBtn.addEventListener('click', async () => {
+        // --- ADDED: CHANGE 5 ---
+        if (stopScreenRecording)   await stopScreenRecording();
+        if (stopDistractionDetector) stopDistractionDetector();
+        // -----------------------
+
         stopCameraRecording();
         clearGlobalTimer();
         clearInterval(window.currentInterval);

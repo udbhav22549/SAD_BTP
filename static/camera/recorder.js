@@ -32,6 +32,13 @@ async function loop() {
         // 1. Get raw data
         const results = faceLandmarker.detectForVideo(activeVideo, performance.now());
         
+        // --- ADDED: CHANGE 4 (Distraction Detection Hook) ---
+        // We pass the raw results to the distraction detector immediately
+        if (window._detectDistraction) {
+            window._detectDistraction(activeVideo, results);
+        }
+        // ----------------------------------------------------
+        
         if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
             const blend = results.faceBlendshapes[0].categories;
             
