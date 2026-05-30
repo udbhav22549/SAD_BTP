@@ -170,6 +170,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return Math.floor((Date.now() - sessionStartTime) / 1000);
     }
 
+    function showInlineWarning(msg) {
+        let el = document.getElementById('inlineWarning');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'inlineWarning';
+            el.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:12px 24px;border-radius:8px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+            document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        el.style.display = 'block';
+        clearTimeout(el._timer);
+        el._timer = setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+
     function logEvent(stage, variable_field = {}) {
         const payload = {
             stage: stage,
@@ -612,7 +626,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (selected) mcqAnswers[currentMcqIndex] = selected.value;
 
             if (Object.keys(mcqAnswers).length < mcqQuestions.length) {
-                alert("Please answer all questions before submitting.");
+                let existing = document.getElementById('mcqWarning');
+                if (!existing) {
+                    existing = document.createElement('div');
+                    existing.id = 'mcqWarning';
+                    existing.style.cssText = 'background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:12px 20px;border-radius:8px;margin-top:12px;font-weight:600;text-align:center;';
+                    document.getElementById('mcqContainer').after(existing);
+                }
+                const unanswered = mcqQuestions.length - Object.keys(mcqAnswers).length;
+                existing.textContent = `Please answer all questions before submitting. (${unanswered} unanswered)`;
                 return;
             }
 
@@ -755,8 +777,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let type = document.getElementById("guessTypeSelect").value;
 
         if (guessed && (type === "" || type === null)) {
-            alert("Please select a Guess Type.");
-            return; 
+            showInlineWarning("Please select a Guess Type.");
+            return;
         }
 
         if (!guessed) type = "";
@@ -775,8 +797,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let type = document.getElementById("guessTypeSelect").value;
 
         if (guessed && (type === "" || type === null)) {
-            alert("Since you selected 'Yes' for guessing, please select a Guess Type.");
-            return; 
+            showInlineWarning("Please select a Guess Type.");
+            return;
         }
 
         if (!guessed) type = "";
@@ -797,14 +819,11 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleEndSession(true);
 
         // --- TIMER: 10 Minutes ---
-        // Notice we made this callback async for the new cleanup calls
         startGlobalTimer(10 * 60, "Stage-5", async () => {
             logEvent("image_task_timeout");
-            
-            // --- ADDED: CHANGE 5 ---
+
             if (stopScreenRecording)   await stopScreenRecording();
             if (stopDistractionDetector) stopDistractionDetector();
-            // -----------------------
 
             const cameraData = stopCameraRecording();
             fetch("/save_camera_log", {
@@ -840,11 +859,17 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    function showCompletionScreen() {
-        window.location.href = "/thankyou";
+    async function finalizeAndRedirect(destination) {
+        if (window._finalizeEyeTracking) {
+            try { await window._finalizeEyeTracking(); } catch(e) { console.warn('Eye tracking finalize error:', e); }
+        }
+        window.location.href = destination;
     }
 
-    // Notice we made this click callback async
+    function showCompletionScreen() {
+        finalizeAndRedirect("/thankyou");
+    }
+
     container.addEventListener('click', async (e) => {
         if (e.target.id === 'newExpBtn') {
             e.preventDefault();
@@ -857,7 +882,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const text = document.getElementById("imageDescInput").value.trim();
 
             if (!text) {
-                alert("Please write your description before proceeding.");
+                showInlineWarning("Please write your description before proceeding.");
                 return;
             }
 
@@ -874,14 +899,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Stop and Save
-            // --- ADDED: CHANGE 5 ---
             if (stopScreenRecording)   await stopScreenRecording();
             if (stopDistractionDetector) stopDistractionDetector();
-            // -----------------------
 
             const cameraData = stopCameraRecording();
-            clearGlobalTimer(); // Stop timer
+            clearGlobalTimer();
 
             fetch("/save_camera_log", {
                 method: "POST",
@@ -893,45 +915,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Notice we made this click callback async
     container.addEventListener('click', async (e) => {
         if (e.target.id === 'finishBtn') {
-            // --- ADDED: CHANGE 5 ---
             if (stopScreenRecording)   await stopScreenRecording();
             if (stopDistractionDetector) stopDistractionDetector();
-            // -----------------------
 
             stopCameraRecording();
             logEvent("FINISH", {});
-            window.location.href = "/thankyou";
+            await finalizeAndRedirect("/thankyou");
         }
     });
 
-    // Notice we made this callback async
     endBtn.addEventListener('click', async () => {
-        // --- ADDED: CHANGE 5 ---
         if (stopScreenRecording)   await stopScreenRecording();
         if (stopDistractionDetector) stopDistractionDetector();
-        // -----------------------
 
         stopCameraRecording();
         clearGlobalTimer();
         logEvent('session_ended', {});
-        window.location.href = "/thankyou";
+        await finalizeAndRedirect("/thankyou");
     });
-    
-    // Notice we made this callback async
+
     exitBtn.addEventListener('click', async () => {
-        // --- ADDED: CHANGE 5 ---
         if (stopScreenRecording)   await stopScreenRecording();
         if (stopDistractionDetector) stopDistractionDetector();
-        // -----------------------
 
         stopCameraRecording();
         clearGlobalTimer();
         clearInterval(window.currentInterval);
         logEvent("EXIT", {});
-        window.location.href = "/thankyou";
+        await finalizeAndRedirect("/thankyou");
     });
 
     renderStartScreen();

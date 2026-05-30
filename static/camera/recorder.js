@@ -32,12 +32,7 @@ async function loop() {
         // 1. Get raw data
         const results = faceLandmarker.detectForVideo(activeVideo, performance.now());
         
-        // --- NEW: Send Landmarks to Screen Recorder for Eye-Cropping ---
-        if (window._updateEyeRegion && results.faceLandmarks && results.faceLandmarks.length > 0) {
-            window._updateEyeRegion(results.faceLandmarks[0], activeVideo.videoWidth, activeVideo.videoHeight);
-        }
-        
-        // --- Existing: Send Blendshapes to Distraction Detector ---
+        // --- Send Blendshapes to Distraction Detector ---
         if (window._detectDistraction) {
             window._detectDistraction(activeVideo, results);
         }

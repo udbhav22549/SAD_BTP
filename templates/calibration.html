@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eye Tracking Calibration</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0d0d14;
+    color: #e0e0f0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body.hide-cursor, body.hide-cursor * {
+    cursor: none !important;
+  }
+
+  #camera-preview {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    width: 160px;
+    height: 120px;
+    border-radius: 10px;
+    border: 2px solid rgba(100,200,255,0.4);
+    object-fit: cover;
+    z-index: 100;
+    transform: scaleX(-1);
+    background: #111;
+  }
+
+  .phase {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+    max-width: 560px;
+    padding: 40px;
+    animation: fadeIn .4s ease;
+  }
+  .phase.active { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; } }
+
+  .phase h1 { font-size: 2rem; font-weight: 700; color: #a0c4ff; }
+  .phase p  { font-size: 1.1rem; line-height: 1.65; color: #b0b8d0; }
+
+  .btn {
+    padding: 14px 36px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #4f8ef7, #7b5ea7);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(79,142,247,.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(79,142,247,.55); }
+
+  #status-msg {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 50px;
+    padding: 8px 24px;
+    font-size: .9rem;
+    color: #a0cfff;
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    transition: opacity .3s;
+  }
+
+  #progress-wrap {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: rgba(255,255,255,.1);
+    z-index: 200;
+  }
+  #progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4f8ef7, #a06fff);
+    transition: width .6s ease;
+  }
+
+  #calib-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #0a0a12;
+    z-index: 150;
+  }
+
+  #calib-instructions {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 160;
+    pointer-events: none;
+    transition: opacity .4s;
+  }
+  #calib-instructions h2 { font-size: 1.6rem; color: #c0d8ff; margin-bottom: 8px; }
+  #calib-instructions p  { color: #808090; font-size: 1rem; }
+
+  #step-label {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: .95rem;
+    color: #6080aa;
+    z-index: 160;
+    letter-spacing: .08em;
+  }
+
+  #calib-dot {
+    position: fixed;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffffff, #4f8ef7 50%, #2040b0);
+    box-shadow: 0 0 0 0 rgba(79,142,247,.6);
+    transform: translate(-50%, -50%) scale(0);
+    transition:
+      left .65s cubic-bezier(.68,-.55,.27,1.55),
+      top  .65s cubic-bezier(.68,-.55,.27,1.55),
+      transform .3s ease;
+    z-index: 170;
+    pointer-events: none;
+  }
+
+  #calib-dot.active {
+    transform: translate(-50%, -50%) scale(1);
+    animation: pulse 1s ease-out infinite;
+  }
+  #calib-dot.moving {
+    transform: translate(-50%, -50%) scale(0.6);
+    animation: none;
+  }
+
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0  0   rgba(79,142,247,.6); }
+    70%  { box-shadow: 0 0 0 20px rgba(79,142,247,0);   }
+    100% { box-shadow: 0 0 0  0   rgba(79,142,247,0);   }
+  }
+
+  #done-panel {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+    animation: fadeIn .5s ease;
+  }
+  #done-panel h1 { font-size: 2.2rem; color: #7cffb2; }
+  #done-panel p  { color: #90a0b8; font-size: 1.05rem; }
+
+  .checkmark {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(124,255,178,.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem;
+  }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid rgba(79,142,247,.2);
+    border-top-color: #4f8ef7;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<video id="camera-preview" autoplay muted playsinline></video>
+
+<div id="progress-wrap"><div id="progress-bar"></div></div>
+
+<div id="status-msg">Initialising...</div>
+
+<!-- PHASE 1: INTRO -->
+<div class="phase active" id="phase-intro">
+  <h1>Eye Tracking Setup</h1>
+  <p>
+    Before the experiment begins, we need to calibrate the eye tracker.<br>
+    You'll see a <strong>blue dot</strong> appear at five positions on screen.
+    <br><br>
+    <strong>Look directly at each dot</strong> and keep your gaze on it until it moves.
+    The calibration takes about <strong>15 seconds</strong>.
+  </p>
+  <p style="font-size:.95rem; color:#607090;">
+    Please allow webcam access when prompted.
+  </p>
+  <button class="btn btn-primary" id="btn-start-setup">Begin Setup</button>
+</div>
+
+<!-- PHASE 2: PERMISSIONS -->
+<div class="phase" id="phase-permissions">
+  <div class="spinner"></div>
+  <h1>Requesting Permissions</h1>
+  <p>Please allow <strong>webcam access</strong> in the browser prompt above.</p>
+</div>
+
+<!-- PHASE 3: CALIBRATION OVERLAY -->
+<div id="calib-overlay">
+  <div id="step-label">Step 1 of 5</div>
+  <div id="calib-instructions">
+    <h2>Calibration Starting...</h2>
+    <p>Keep your eyes on the blue dot as it moves.</p>
+  </div>
+  <div id="calib-dot"></div>
+</div>
+
+<!-- PHASE 4: RETRY -->
+<div id="retry-panel" class="phase">
+  <h1 style="color: #ff6b6b;">Calibration Failed</h1>
+  <p>We couldn't detect your gaze properly. Please make sure:<br><br>
+    - You are <strong>facing the screen directly</strong><br>
+    - Your face is <strong>well-lit</strong> and visible in the camera<br>
+    - You <strong>look at each dot</strong> as it appears
+  </p>
+  <button class="btn btn-primary" id="btn-retry">Try Again</button>
+</div>
+
+<!-- PHASE 5: DONE -->
+<div id="done-panel">
+  <div class="checkmark">&#10003;</div>
+  <h1>Calibration Complete!</h1>
+  <p>Your eye tracker is calibrated and recording is active.<br>
+     The experiment will begin now.</p>
+  <button class="btn btn-primary" id="btn-continue">Continue to Experiment</button>
+</div>
+
+<script src="/static/js/eyetracker/gaze_tracker.js"></script>
+<script src="/static/js/eyetracker/calibration.js"></script>
+<script src="/static/js/eyetracker/gaze_logger.js"></script>
+
+<script>
+let gazeTracker    = null;
+let calibModel     = null;
+
+const status  = document.getElementById('status-msg');
+const progBar = document.getElementById('progress-bar');
+
+function setStatus(msg) { status.textContent = msg; }
+function setProgress(n, total) { progBar.style.width = `${(n / total) * 100}%`; }
+
+function showPhase(id) {
+    document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
+}
+
+document.getElementById('btn-start-setup').addEventListener('click', async () => {
+    showPhase('phase-permissions');
+    setStatus('Requesting webcam...');
+
+    let cameraStream;
+    try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480, facingMode: 'user' },
+            audio: false
+        });
+    } catch (err) {
+        setStatus('Camera access denied. Please allow webcam and reload.');
+        return;
+    }
+
+    const camPreview = document.getElementById('camera-preview');
+    camPreview.srcObject = cameraStream;
+    await camPreview.play();
+    setStatus('Camera ready. Initialising eye tracker...');
+
+    gazeTracker = new GazeTracker();
+    try {
+        await gazeTracker.initialize(camPreview);
+        setStatus('Eye tracker ready. Requesting screen share...');
+    } catch (err) {
+        setStatus('Eye tracker failed: ' + err.message);
+        console.error(err);
+        return;
+    }
+
+    setStatus('Starting calibration...');
+    setProgress(0, 5);
+
+    document.body.classList.add('hide-cursor');
+
+    await new Promise(r => setTimeout(r, 600));
+    startCalibration(camPreview);
+});
+
+
+function startCalibration(camPreview) {
+    showPhase('');
+
+    const overlay = document.getElementById('calib-overlay');
+    const dot     = document.getElementById('calib-dot');
+    const instrEl = document.getElementById('calib-instructions');
+    const stepLbl = document.getElementById('step-label');
+
+    const NAMES = ['Centre', 'Top-Right', 'Bottom-Right', 'Bottom-Left', 'Top-Left'];
+
+    overlay.style.display = 'block';
+
+    const manager = new CalibrationManager(
+        gazeTracker,
+        dot,
+        overlay,
+        async (model) => {
+            calibModel = model;
+            gazeTracker.setCalibrationModel(model);
+
+            try {
+                await fetch('/save_calibration', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: model.toJSON() })
+                });
+            } catch (e) { console.warn("Could not save calibration:", e); }
+
+            setStatus('Calibration saved');
+            instrEl.style.opacity = '0';
+            await new Promise(r => setTimeout(r, 300));
+            overlay.style.display = 'none';
+            showDone();
+        },
+        (stepIdx, total) => {
+            const pct = ((stepIdx) / total) * 100;
+            progBar.style.width = pct + '%';
+            stepLbl.textContent = `Step ${stepIdx + 1} of ${total}  -  Look at the dot`;
+            instrEl.style.opacity = stepIdx === 0 ? '1' : '0';
+            setStatus(`Calibrating point ${stepIdx + 1} / ${total}: ${NAMES[stepIdx]}`);
+        },
+        () => {
+            document.body.classList.remove('hide-cursor');
+            document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+            document.getElementById('retry-panel').classList.add('active');
+            setStatus('Calibration failed — not enough gaze data collected.');
+        }
+    );
+
+    setTimeout(() => manager.start(), 400);
+}
+
+document.getElementById('btn-retry').addEventListener('click', () => {
+    showPhase('');
+    const camPreview = document.getElementById('camera-preview');
+    document.body.classList.add('hide-cursor');
+    setStatus('Retrying calibration...');
+    startCalibration(camPreview);
+});
+
+
+function showDone() {
+    document.body.classList.remove('hide-cursor');
+    document.getElementById('done-panel').style.display = 'flex';
+    progBar.style.width = '100%';
+    setStatus('All set! Click Continue to begin the experiment.');
+}
+
+
+document.getElementById('btn-continue').addEventListener('click', async () => {
+    document.getElementById('btn-continue').disabled = true;
+    document.getElementById('btn-continue').textContent = 'Starting...';
+    setStatus('Starting gaze recording...');
+
+    if (calibModel) {
+        sessionStorage.setItem('gazeCalibModel', JSON.stringify(calibModel.toJSON()));
+    }
+
+    window.activeGazeTracker = gazeTracker;
+    window.activeCalibModel  = calibModel;
+
+    await new Promise(r => setTimeout(r, 500));
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/begin';
+    document.body.appendChild(form);
+    form.submit();
+});
+</script>
+</body>
+</html>

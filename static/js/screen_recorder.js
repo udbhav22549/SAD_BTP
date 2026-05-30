@@ -1,9 +1,8 @@
 /**
  * screen_recorder.js
  *
- * Composites screen and webcam onto a hidden <canvas>.
- * The webcam feed is CROPPED to only show the user's eyes.
- * Records the canvas stream as a WebM blob.
+ * Composites screen, webcam (top-left), and gaze dot onto a hidden <canvas>.
+ * Records the canvas stream as a WebM blob, uploading in 30-second chunks.
  */
 
 let _mediaRecorder = null;
@@ -14,69 +13,25 @@ let _animFrameId = null;
 let _screenStream = null;
 let _screenVideo = null;
 
-// The current bounding box for the eyes
-window._eyeCrop = { sx: 0, sy: 0, sw: 100, sh: 50, isValid: false };
-
-/**
- * Calculates a tight bounding box strictly around the eyeballs/eyelids
- * based on MediaPipe landmarks (Eyebrows removed).
- */
-window._updateEyeRegion = function(landmarks, vWidth, vHeight) {
-    // Indices for STRICTLY eye corners and eyelids (No eyebrows)
-    // Left eye: 33, 133 (corners), 159 (top), 145 (bottom)
-    // Right eye: 362, 263 (corners), 386 (top), 374 (bottom)
-    const eyePoints = [33, 133, 362, 263, 159, 145, 386, 374];
-    let minX = 1, maxX = 0, minY = 1, maxY = 0;
-    
-    eyePoints.forEach(idx => {
-        const lm = landmarks[idx];
-        if(lm.x < minX) minX = lm.x;
-        if(lm.x > maxX) maxX = lm.x;
-        if(lm.y < minY) minY = lm.y;
-        if(lm.y > maxY) maxY = lm.y;
-    });
-
-    // Drastically reduced padding for a much tighter crop
-    const padX = 0.04; // Only 4% extra space on the sides
-    const padY = 0.06; // Only 6% extra space above/below (down from 15%)
-    
-    minX = Math.max(0, minX - padX);
-    maxX = Math.min(1, maxX + padX);
-    minY = Math.max(0, minY - padY);
-    maxY = Math.min(1, maxY + padY);
-
-    window._eyeCrop = {
-        sx: minX * vWidth,
-        sy: minY * vHeight,
-        sw: (maxX - minX) * vWidth,
-        sh: (maxY - minY) * vHeight,
-        isValid: true
-    };
-};
-
 export async function startScreenRecording(webcamVideoEl) {
   try {
-    // 1. Request screen capture with STRICT hints
     _screenStream = await navigator.mediaDevices.getDisplayMedia({
-      video: { 
-          cursor: "always", 
-          displaySurface: "monitor" 
+      video: {
+          cursor: "always",
+          displaySurface: "monitor"
       },
       audio: false,
-      surfaceSwitching: "exclude" // NEW: Prevents Chrome from showing the "Share this tab instead" button
+      surfaceSwitching: "exclude"
     });
 
-    // 2. ULTRA-STRICT VALIDATION: Did they actually pick "Entire Screen"?
     const videoTrack = _screenStream.getVideoTracks()[0];
     const settings = videoTrack.getSettings();
 
-    // Remove the loophole. If it is NOT exactly "monitor", reject it.
     if (settings.displaySurface !== "monitor") {
-        videoTrack.stop(); // Kill the stream immediately
-        throw new Error("NOT_MONITOR"); // Trigger the catch block in experiment.js
+        videoTrack.stop();
+        throw new Error("NOT_MONITOR");
     }
 
-    // 3. Create hidden video element
     _screenVideo = document.createElement("video");
     _screenVideo.srcObject = _screenStream;
     _screenVideo.muted = true;
@@ -84,7 +39,6 @@ export async function startScreenRecording(webcamVideoEl) {
     document.body.appendChild(_screenVideo);
     await _screenVideo.play();
 
-    // 4. Create hidden composite canvas
     _compositeCanvas = document.createElement("canvas");
     _compositeCanvas.width = 1280;
     _compositeCanvas.height = 720;
@@ -94,7 +48,6 @@ export async function startScreenRecording(webcamVideoEl) {
 
     _drawFrame(webcamVideoEl);
 
-    // 5. Record the canvas stream
     const canvasStream = _compositeCanvas.captureStream(15);
     _recordedChunks = [];
 
@@ -106,18 +59,16 @@ export async function startScreenRecording(webcamVideoEl) {
 
     _mediaRecorder.ondataavailable = async (e) => {
         if (e.data && e.data.size > 0) {
-            // Upload this specific 30-second chunk immediately
             await _uploadRecording(e.data);
         }
     };
 
-    // Start recording and trigger 'ondataavailable' every 30 seconds
     _mediaRecorder.start(30000);
-    console.log("[ScreenRecorder] Eye-Crop Recording started.");
+    console.log("[ScreenRecorder] Recording started (screen + camera + gaze).");
 
   } catch (err) {
     console.error("[ScreenRecorder] Failed to start:", err);
-    throw err; // Send error back to experiment.js
+    throw err;
   }
 }
 
@@ -126,20 +77,10 @@ export async function stopScreenRecording() {
 
   return new Promise((resolve) => {
     _mediaRecorder.onstop = () => {
-      // Stop animation loop
       if (_animFrameId) cancelAnimationFrame(_animFrameId);
-      
-      // Stop screen stream tracks
       if (_screenStream) _screenStream.getTracks().forEach(t => t.stop());
-      
-      // Clean up DOM
       if (_screenVideo) _screenVideo.remove();
       if (_compositeCanvas) _compositeCanvas.remove();
-
-      // Note: We do NOT need to manually upload here.
-      // Calling _mediaRecorder.stop() automatically triggers 
-      // ondataavailable one last time, which handles the final upload!
-      
       resolve();
     };
 
@@ -152,7 +93,7 @@ function _drawFrame(webcamVideoEl) {
   const W = _compositeCanvas.width;
   const H = _compositeCanvas.height;
 
-  // Draw Screen
+  // 1. Draw screen
   if (_screenVideo && _screenVideo.readyState >= 2) {
     ctx.drawImage(_screenVideo, 0, 0, W, H);
   } else {
@@ -160,33 +101,55 @@ function _drawFrame(webcamVideoEl) {
     ctx.fillRect(0, 0, W, H);
   }
 
-  // Draw EYE-CROP PiP
-  if (webcamVideoEl && webcamVideoEl.readyState >= 2 && window._eyeCrop.isValid) {
-    const crop = window._eyeCrop;
-    
-    // Set a fixed width for the PiP, dynamically calculate height to maintain natural aspect ratio of the eyes
-    const PIP_W = 320; 
-    const PIP_H = PIP_W * (crop.sh / crop.sw);
-    const MARGIN = 16;
-    const px = W - PIP_W - MARGIN;
-    const py = H - PIP_H - MARGIN;
+  // 2. Draw webcam PiP (top-left, full face)
+  if (webcamVideoEl && webcamVideoEl.readyState >= 2) {
+    const PIP_W = 200;
+    const PIP_H = 150;
+    const MARGIN = 12;
+    const px = MARGIN;
+    const py = MARGIN;
 
     ctx.save();
     _roundRect(ctx, px, py, PIP_W, PIP_H, 8);
     ctx.clip();
-    
-    // CRITICAL: 9-argument drawImage to crop the source video
-    // drawImage(image, source_x, source_y, source_w, source_h, dest_x, dest_y, dest_w, dest_h)
-    ctx.drawImage(webcamVideoEl, crop.sx, crop.sy, crop.sw, crop.sh, px, py, PIP_W, PIP_H);
+    ctx.drawImage(webcamVideoEl, px, py, PIP_W, PIP_H);
     ctx.restore();
 
-    ctx.strokeStyle = "#ffffff";
+    ctx.strokeStyle = "rgba(255,255,255,0.7)";
     ctx.lineWidth = 2;
     _roundRect(ctx, px, py, PIP_W, PIP_H, 8);
     ctx.stroke();
   }
 
-  // Draw Distraction Warning Overlay
+  // 3. Draw gaze dot (from sessionStorage, updated by gaze_overlay.js)
+  const gazeX = parseFloat(sessionStorage.getItem('_live_gaze_x'));
+  const gazeY = parseFloat(sessionStorage.getItem('_live_gaze_y'));
+  const blink = sessionStorage.getItem('_live_blink') === '1';
+
+  if (!isNaN(gazeX) && !isNaN(gazeY) && !blink) {
+    const sx = gazeX * (W / window.innerWidth);
+    const sy = gazeY * (H / window.innerHeight);
+
+    // Halo
+    ctx.beginPath();
+    ctx.arc(sx, sy, 30, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 80, 80, 0.3)';
+    ctx.fill();
+
+    // Dot
+    ctx.beginPath();
+    ctx.arc(sx, sy, 12, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 50, 50, 0.7)';
+    ctx.fill();
+
+    // Center
+    ctx.beginPath();
+    ctx.arc(sx, sy, 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+  }
+
+  // 4. Draw distraction warning overlay
   if (window._isDistracted) {
       ctx.fillStyle = "rgba(255, 0, 0, 0.85)";
       ctx.fillRect(0, 0, W, 100);
@@ -225,7 +188,7 @@ async function _uploadRecording(blob) {
     });
 
     if (res.ok) {
-      console.log("[ScreenRecorder] WebM Upload successful.");
+      console.log("[ScreenRecorder] Chunk uploaded.");
     } else {
       console.warn("[ScreenRecorder] Upload failed:", res.status);
     }

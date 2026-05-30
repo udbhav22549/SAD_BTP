@@ -94,14 +94,22 @@
 
   <video id="videoCam" autoplay playsinline class="hidden"></video>
 
+  <!-- Gaze overlay canvas -->
+  <canvas id="gaze-canvas"></canvas>
+
   <!-- External JS -->
-   <video id="videoCam" autoplay playsinline class="hidden"></video>
 
   <script type="module" src="{{ url_for('static', filename='camera/face.js') }}"></script>
   <script type="module" src="{{ url_for('static', filename='camera/analysis.js') }}"></script>
   <script type="module" src="{{ url_for('static', filename='camera/recorder.js') }}"></script>
 
+  <!-- Eye Tracking Scripts -->
+  <script src="{{ url_for('static', filename='js/eyetracker/gaze_tracker.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/eyetracker/calibration.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/eyetracker/gaze_logger.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/eyetracker/gaze_overlay.js') }}"></script>
+
   <script src="{{ url_for('static', filename='js/experiment.js') }}"></script>
-  
+
 </body>
 </html>
