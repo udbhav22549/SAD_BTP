@@ -4,7 +4,6 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 import sqlite3, os
 from database import get_db_connection
 import hashlib
-# Removed 're' import as sanitize_name_for_path is no longer needed
 
 ADMIN_DATA_DIR = os.path.join(os.path.dirname(__file__), "user_data")
 
@@ -20,9 +19,6 @@ def admin_required(f):
             return redirect(url_for("admin.admin_login"))
         return f(*args, **kwargs)
     return secured
-
-# NOTE: sanitize_name_for_path function has been removed as per your request.
-# The raw participant name will be used directly as the folder name.
 
 
 # ------------ Admin Login Page ------------
@@ -95,8 +91,8 @@ def admin_view_participant(pid):
         other_institution
     ) = data
 
-    # Participant folder is EXACTLY the name (no sanitization)
-    participant_folder = os.path.join(ADMIN_DATA_DIR, name)
+    # Participant folder uses participant_id (unique per session)
+    participant_folder = os.path.join(ADMIN_DATA_DIR, participant_id)
     files = os.listdir(participant_folder) if os.path.exists(participant_folder) else []
 
     return render_template(
@@ -110,25 +106,12 @@ def admin_view_participant(pid):
 @admin_bp.route("/admin/download/<pid>/<filename>")
 @admin_required
 def admin_download(pid, filename):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    # Look up participant data by PID to get the raw name
-    cur.execute("SELECT name FROM participants WHERE participant_id=?", (pid,))
-    row = cur.fetchone()
-    conn.close()
-    
-    if not row:
-        return "Participant not found", 404
-        
-    participant_name = row[0]
-    
-    # Folder lookup uses the raw participant name, NOT the PID
-    folder = os.path.join(ADMIN_DATA_DIR, participant_name)
-    
-    # Check if the folder exists before attempting to serve the file
+    # Folder uses participant_id directly
+    folder = os.path.join(ADMIN_DATA_DIR, pid)
+
     if not os.path.exists(folder):
-        return f"Data folder for {participant_name} not found.", 404
-    
+        return f"Data folder for {pid} not found.", 404
+
     return send_from_directory(folder, filename, as_attachment=True)
 
 
@@ -142,33 +125,16 @@ def admin_logout():
 @admin_bp.route("/admin/delete/<pid>", methods=["POST"])
 @admin_required
 def admin_delete_participant(pid):
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    # Fetch participant name (folder name)
-    cur.execute("SELECT name FROM participants WHERE participant_id=?", (pid,))
-    row = cur.fetchone()
-
-    if not row:
-        conn.close()
-        return "Participant not found", 404
-
-    participant_name = row[0]
-    conn.close()
-
-    # Folder path: user_data/<participant_name>
-    folder_path = os.path.join(ADMIN_DATA_DIR, participant_name)
+    # Folder path uses participant_id directly
+    folder_path = os.path.join(ADMIN_DATA_DIR, pid)
 
     # --- Delete folder and all session files ---
     if os.path.exists(folder_path):
-        # Remove all files inside
         for f in os.listdir(folder_path):
             try:
                 os.remove(os.path.join(folder_path, f))
             except:
                 pass
-        
-        # Remove the folder itself
         try:
             os.rmdir(folder_path)
         except:
@@ -181,5 +147,4 @@ def admin_delete_participant(pid):
     conn.commit()
     conn.close()
 
-    # Redirect back to dashboard
     return redirect(url_for("admin.admin_dashboard"))

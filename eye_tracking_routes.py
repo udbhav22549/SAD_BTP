@@ -11,12 +11,12 @@ USER_DATA_DIR = os.path.join(BASE_DIR, 'user_data')
 
 
 def _get_participant_folder():
-    name = session.get("participant_name")
-    if not name:
+    pid = session.get("participant_id")
+    if not pid:
         return None, None
-    folder = os.path.join(USER_DATA_DIR, name)
+    folder = os.path.join(USER_DATA_DIR, pid)
     os.makedirs(folder, exist_ok=True)
-    return name, folder
+    return pid, folder
 
 
 @eye_tracking_bp.route('/calibration')

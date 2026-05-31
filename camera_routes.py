@@ -11,23 +11,23 @@ USER_DATA_DIR = os.path.join(BASE_DIR, 'user_data')
 
 def get_camera_files():
     """Recovers the correct paths based on the active experiment session."""
-    participant_name = session.get("participant_name")
+    participant_id = session.get("participant_id")
     base_filename = session.get("current_base_filename")
 
-    if not participant_name or not base_filename:
+    if not participant_id or not base_filename:
         return None, None
 
-    folder = os.path.join(USER_DATA_DIR, participant_name)
+    folder = os.path.join(USER_DATA_DIR, participant_id)
     csv_path  = os.path.join(folder, f"{base_filename}_camera.csv")
     json_path = os.path.join(folder, f"{base_filename}_camera.json")
     return csv_path, json_path
 
 
 def get_participant_folder():
-    participant_name = session.get("participant_name")
-    if not participant_name:
+    participant_id = session.get("participant_id")
+    if not participant_id:
         return None
-    return os.path.join(USER_DATA_DIR, participant_name)
+    return os.path.join(USER_DATA_DIR, participant_id)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

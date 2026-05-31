@@ -75,8 +75,8 @@ def participant_submit():
     session['participant_id'] = participant_id
     session["participant_name"] = name
 
-    # create folder for participant
-    folder = os.path.join(USER_DATA_DIR, name)
+    # create folder for participant using unique participant_id
+    folder = os.path.join(USER_DATA_DIR, participant_id)
     os.makedirs(folder, exist_ok=True)
 
     # store details in DB (your table name may differ)
@@ -169,10 +169,10 @@ def start_session():
     participant_name = session.get("participant_name")
     timestamp_tag = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
-    participant_folder = os.path.join(USER_DATA_DIR, participant_name)
+    participant_folder = os.path.join(USER_DATA_DIR, participant_id)
     os.makedirs(participant_folder, exist_ok=True)
 
-    base_filename = f"session_{participant_name}_{timestamp_tag}"
+    base_filename = f"session_{participant_id}_{timestamp_tag}"
     csv_path = os.path.join(participant_folder, base_filename + ".csv")
     json_path = os.path.join(participant_folder, base_filename + ".json")
 
@@ -202,7 +202,7 @@ def start_session():
         json.dump([first_event], f, indent=4, ensure_ascii=False)
 
     # store paths in memory
-    SESSION_FILES[participant_name] = {
+    SESSION_FILES[participant_id] = {
         "csv": csv_path,
         "json": json_path
     }
@@ -227,9 +227,8 @@ def log_event():
       "variable_field": {...}          # dict, will be stored as JSON
     }
     """
-    participant_name = session.get("participant_name")
     participant_id = session.get("participant_id")
-    paths = SESSION_FILES.get(participant_name)
+    paths = SESSION_FILES.get(participant_id)
     if not participant_id:
         return jsonify({"error": "No participant in session"}), 400
 
