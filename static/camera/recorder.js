@@ -37,18 +37,36 @@ async function loop() {
             window._detectDistraction(activeVideo, results);
         }
         
+        if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+            const lm = results.faceLandmarks[0];
+            const eyeIndices = [33, 133, 160, 158, 153, 144, 362, 263, 385, 387, 373, 380, 70, 63, 105, 66, 107, 336, 296, 334, 293, 300];
+            let minX = 1, maxX = 0, minY = 1, maxY = 0;
+            for (const idx of eyeIndices) {
+                if (lm[idx]) {
+                    minX = Math.min(minX, lm[idx].x);
+                    maxX = Math.max(maxX, lm[idx].x);
+                    minY = Math.min(minY, lm[idx].y);
+                    maxY = Math.max(maxY, lm[idx].y);
+                }
+            }
+            const padX = (maxX - minX) * 0.3;
+            const padY = (maxY - minY) * 0.5;
+            sessionStorage.setItem('_eye_crop_x', Math.max(0, minX - padX).toFixed(4));
+            sessionStorage.setItem('_eye_crop_y', Math.max(0, minY - padY).toFixed(4));
+            sessionStorage.setItem('_eye_crop_w', Math.min(1, maxX - minX + padX * 2).toFixed(4));
+            sessionStorage.setItem('_eye_crop_h', Math.min(1, maxY - minY + padY * 2).toFixed(4));
+        }
+
         if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
             const blend = results.faceBlendshapes[0].categories;
-            
-            // 2. Analyze
+
             const emotion = getEmotion(blend);
             const aus = getAUs(blend);
 
-            // 3. SEND EVERYTHING 
             const payload = {
                 timestamp: new Date().toISOString(),
                 emotion: emotion,
-                AUs: aus 
+                AUs: aus
             };
 
             fetch("/append_camera_log", {

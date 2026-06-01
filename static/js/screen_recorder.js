@@ -101,18 +101,30 @@ function _drawFrame(webcamVideoEl) {
     ctx.fillRect(0, 0, W, H);
   }
 
-  // 2. Draw webcam PiP (top-left, full face)
+  // 2. Draw webcam PiP (top-left, cropped to eye region only)
   if (webcamVideoEl && webcamVideoEl.readyState >= 2) {
-    const PIP_W = 200;
-    const PIP_H = 150;
+    const PIP_W = 220;
+    const PIP_H = 80;
     const MARGIN = 12;
     const px = MARGIN;
     const py = MARGIN;
 
+    const cropX = parseFloat(sessionStorage.getItem('_eye_crop_x')) || 0.2;
+    const cropY = parseFloat(sessionStorage.getItem('_eye_crop_y')) || 0.3;
+    const cropW = parseFloat(sessionStorage.getItem('_eye_crop_w')) || 0.6;
+    const cropH = parseFloat(sessionStorage.getItem('_eye_crop_h')) || 0.2;
+
+    const vw = webcamVideoEl.videoWidth;
+    const vh = webcamVideoEl.videoHeight;
+    const sx = cropX * vw;
+    const sy = cropY * vh;
+    const sw = cropW * vw;
+    const sh = cropH * vh;
+
     ctx.save();
     _roundRect(ctx, px, py, PIP_W, PIP_H, 8);
     ctx.clip();
-    ctx.drawImage(webcamVideoEl, px, py, PIP_W, PIP_H);
+    ctx.drawImage(webcamVideoEl, sx, sy, sw, sh, px, py, PIP_W, PIP_H);
     ctx.restore();
 
     ctx.strokeStyle = "rgba(255,255,255,0.7)";
